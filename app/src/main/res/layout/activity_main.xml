@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    tools:context=".implementation.java.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:orientation="vertical">
+
+        <!-- Math Question -->
+        <TextView
+            style="@style/Heading"
+            android:layout_marginBottom="@dimen/margin_m"
+            android:text="@string/mathematical_question"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+
+            <!-- First Operand -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                android:hint="@string/first_operand"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_first_operand"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    android:textSize="@dimen/text_size_xs" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Second Operand -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="@string/second_operand"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_second_operand"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    android:textSize="@dimen/text_size_xs" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- Operators -->
+        <TextView
+            style="@style/SubTitle"
+            android:layout_marginTop="@dimen/margin_m"
+            android:layout_marginBottom="@dimen/margin_m"
+            android:text="@string/choose_operator"/>
+        <Spinner
+            android:id="@+id/spinner_operators"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_spinner"
+            tools:listitem="@android:layout/simple_list_item_1"/>
+
+        <!-- Delay Time -->
+        <TextView
+            style="@style/Heading"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="@dimen/margin_m"
+            android:text="@string/delay_time"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/in_seconds"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_delay_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:textSize="@dimen/text_size_xs" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Calculate Button -->
+        <Button
+            android:id="@+id/btn_calculate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:text="@string/calculate"/>
+
+        <!-- Current Location Option -->
+        <TextView
+            style="@style/Heading"
+            android:layout_marginBottom="@dimen/margin_m"
+            android:text="@string/location_info"/>
+        <LinearLayout
+            android:id="@+id/current_location_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/cb_my_current_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:clickable="false"
+                android:focusable="false"
+                app:buttonTint="@color/purple_700"
+                android:text="@string/show_current_location"
+                tools:checked="true"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="@dimen/margin_m"
+                android:layout_marginEnd="@dimen/margin_m"
+                app:srcCompat="@drawable/ic_my_location"
+                android:contentDescription="@string/a11y_location" />
+
+            <ProgressBar
+                android:id="@+id/progress_location"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+        </LinearLayout>
+
+        <!-- Location (Lat & Long) -->
+        <LinearLayout
+            android:id="@+id/lat_long_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_m"
+            android:layout_marginEnd="@dimen/margin_m"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Latitude: 30.30405"/>
+
+            <TextView
+                android:id="@+id/longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Longitude: 10.106070"/>
+        </LinearLayout>
+
+        <!-- Tabs for Pending Operations & Results-->
+        <TextView
+            style="@style/Heading"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:text="@string/operations"/>
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:elevation="0dp">
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                app:tabGravity="fill"
+                app:tabMode="fixed"
+                app:tabIndicatorHeight="1dp"
+                app:tabIndicatorColor="@color/teal_700"
+                app:tabSelectedTextColor="@color/teal_700"/>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- Pending Operations -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_pending_operations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/section_min_height"
+            tools:itemCount="3"
+            tools:listitem="@layout/pending_operation_list_item" />
+
+        <!-- Operations Results -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_operations_results"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/section_min_height"
+            android:visibility="gone"
+            tools:itemCount="3"
+            tools:listitem="@layout/operation_result_list_item" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
