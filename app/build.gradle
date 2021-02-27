@@ -12,12 +12,14 @@ android {
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
 
+    def VERSION_CODE = 1
+    def VERSION_NAME = "1.0.0"
+    def FORMATTED_DATE = new Date().format('yyyyMMddHHmm')
+
     defaultConfig {
         applicationId "com.va.android.task"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -26,8 +28,15 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            applicationVariants.all { variant ->
+                variant.outputs.all {
+                    def flavor = variant.name
+                    outputFileName = "VA_Computing_${flavor}_${VERSION_NAME}_${FORMATTED_DATE}.apk"
+                }
+            }
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -35,6 +44,23 @@ android {
 
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    flavorDimensions 'version'
+    productFlavors {
+        QA {
+            dimension = 'version'
+            versionCode = VERSION_CODE
+            versionName = VERSION_NAME
+            applicationIdSuffix = '.QA'
+            versionNameSuffix = '-QA'
+        }
+
+        Prod {
+            dimension = 'version'
+            versionCode = VERSION_CODE
+            versionName = VERSION_NAME
+        }
     }
 }
 
