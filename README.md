@@ -8,6 +8,15 @@ This is a sample app that communicates with a math engine service to perform som
 4. I am going to add another implementation using **Kotlin & coroutines**.
 5. The background service will be restarted after being destroyed by the OS, and I am considering to add a mechanism to restart the service after device rebooting (we could use the Android AlarmManager API or by scheduling a periodic background job to check that the service is running and restart it if needed).
 
+### Build & Installation Instructions
+There are two gradle custom tasks that could be used to clean, build, and install the app, one for the QA flavor and the other for the Prod flavor
+* On Windows, run the following commands in a terminal window:
+	use `gradlew cleanBuildInstallQA` to install the QA version of the app.
+	use `gradlew cleanBuildInstallProd` to install the Prod version of the app.
+* On Linux or Mac, run the following commands in a terminal window:
+	use `./gradlew cleanBuildInstallQA` to install the QA version of the app.
+	use `./gradlew cleanBuildInstallProd` to install the Prod version of the app.
+
 ### Other Notes
 * The project could be implemented using some Jetpack libraries like (Data Binding, ViewModel, LiveData, etc..).
 * We could use a dependency injection framework like *Dagger*.

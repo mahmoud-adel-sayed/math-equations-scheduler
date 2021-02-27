@@ -23,3 +23,11 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task cleanBuildInstallQA(type: GradleBuild) {
+    tasks = ['clean', 'assembleQA', 'installQADebug']
+}
+
+task cleanBuildInstallProd(type: GradleBuild) {
+    tasks = ['clean', 'assembleProd', 'installProdDebug']
+}
