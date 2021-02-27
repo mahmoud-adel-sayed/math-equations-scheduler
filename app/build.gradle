@@ -93,12 +93,10 @@ dependencies {
     testImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     testImplementation "androidx.test.espresso:espresso-contrib:$espressoVersion"
     testImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
 
     // Android unit tests
     androidTestImplementation "junit:junit:$junitVersion"
     androidTestImplementation "org.mockito:mockito-core:$mockitoVersion"
-    androidTestImplementation "org.hamcrest:hamcrest-all:$hamcrestVersion"
     androidTestImplementation "androidx.test:core-ktx:$testCoreVersion"
     androidTestImplementation "androidx.test.ext:junit-ktx:$testExtKotlinRunnerVersion"
     androidTestImplementation "androidx.test:rules:$testRulesVersion"
@@ -106,6 +104,7 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
     androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
+    androidTestImplementation "com.google.truth:truth:$truthVersion"
 
     // Conflict resolution between main and test APK
     androidTestImplementation "androidx.appcompat:appcompat:$appCompatVersion"
