@@ -162,6 +162,8 @@ public class MainActivity extends AppCompatActivity {
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
+
+        startService(new Intent(this, MathEngineService.class));
     }
 
     @Override

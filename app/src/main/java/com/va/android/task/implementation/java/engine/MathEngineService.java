@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
+import com.va.android.task.BuildConfig;
 import com.va.android.task.R;
 import com.va.android.task.implementation.java.data.model.MathAnswer;
 import com.va.android.task.implementation.java.data.model.MathQuestion;
@@ -29,7 +30,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 public class MathEngineService extends Service {
-    private static final String PACKAGE_NAME = "com.va.android.task";
+    private static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
     private static final int NOTIFICATION_ID = 1;
 
     public static final String ACTION_CALCULATE = PACKAGE_NAME + ".engine.action.CALCULATE";
