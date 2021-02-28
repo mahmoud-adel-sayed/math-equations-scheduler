@@ -13,9 +13,11 @@ import android.os.Looper;
 
 import com.va.android.task.BuildConfig;
 import com.va.android.task.R;
+import com.va.android.task.implementation.java.App;
 import com.va.android.task.implementation.java.data.model.MathAnswer;
 import com.va.android.task.implementation.java.data.model.MathQuestion;
 import com.va.android.task.implementation.java.data.model.Operator;
+import com.va.android.task.implementation.java.util.SimpleCountingIdlingResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
@@ -49,6 +52,9 @@ public class MathEngineService extends Service {
     private NotificationManagerCompat mNotificationManager;
     private NotificationCompat.Builder mNotificationBuilder;
 
+    @Nullable
+    private SimpleCountingIdlingResource mIdlingResource;
+
     public interface Listener {
         void onResultsChanged();
         void onPendingOperationsChanged();
@@ -63,6 +69,7 @@ public class MathEngineService extends Service {
         mMainThreadHandler = new Handler(Looper.getMainLooper());
         mPendingTasks = new CopyOnWriteArrayList<>();
         mResults = new CopyOnWriteArrayList<>();
+        mIdlingResource = ((App)getApplication()).getIdlingResource();
 
         mNotificationActionsReceiver = new NotificationActionsReceiver();
         IntentFilter filter = new IntentFilter();
@@ -140,6 +147,9 @@ public class MathEngineService extends Service {
         for (Listener listener : mListeners) {
             listener.onPendingOperationsChanged();
         }
+        if (mIdlingResource != null) {
+            mIdlingResource.increment();
+        }
         mScheduler.schedule(new Task(mathQuestion), mathQuestion.getDelayTime(), TimeUnit.SECONDS);
     }
 
@@ -168,6 +178,9 @@ public class MathEngineService extends Service {
             }
             updateNotificationContent();
             mNotificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
+            if (mIdlingResource != null) {
+                mIdlingResource.decrement();
+            }
         });
     }
 

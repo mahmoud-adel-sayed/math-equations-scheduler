@@ -7,6 +7,9 @@ import android.app.NotificationManager;
 import android.os.Build;
 
 import com.va.android.task.R;
+import com.va.android.task.implementation.java.util.SimpleCountingIdlingResource;
+
+import androidx.annotation.Nullable;
 
 public class App extends Application {
 
@@ -32,5 +35,11 @@ public class App extends Application {
                 nm.createNotificationChannel(notificationChannel);
             }
         }
+    }
+
+    // The Idling Resource which will be null in production.
+    @Nullable
+    public SimpleCountingIdlingResource getIdlingResource() {
+        return null;
     }
 }
