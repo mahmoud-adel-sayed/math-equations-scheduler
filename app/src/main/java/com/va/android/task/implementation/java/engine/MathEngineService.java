@@ -1,5 +1,6 @@
 package com.va.android.task.implementation.java.engine;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -10,6 +11,8 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 
 import com.va.android.task.BuildConfig;
 import com.va.android.task.R;
@@ -34,6 +37,7 @@ import androidx.core.app.NotificationManagerCompat;
 
 public class MathEngineService extends Service {
     private static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
+    private static final String WAKE_LOCK_TAG = "VA:MathEngineServiceWakeLockTag";
     private static final int NOTIFICATION_ID = 1;
 
     public static final String ACTION_CALCULATE = PACKAGE_NAME + ".engine.action.CALCULATE";
@@ -44,6 +48,7 @@ public class MathEngineService extends Service {
     private final List<Listener> mListeners = new ArrayList<>();
 
     private ScheduledExecutorService mScheduler;
+    private WakeLock mWakeLock;
     private Handler mMainThreadHandler;
     private List<MathQuestion> mPendingTasks;
     private List<MathAnswer> mResults;
@@ -70,6 +75,9 @@ public class MathEngineService extends Service {
         mPendingTasks = new CopyOnWriteArrayList<>();
         mResults = new CopyOnWriteArrayList<>();
         mIdlingResource = ((App)getApplication()).getIdlingResource();
+
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK_TAG);
 
         mNotificationActionsReceiver = new NotificationActionsReceiver();
         IntentFilter filter = new IntentFilter();
@@ -103,6 +111,9 @@ public class MathEngineService extends Service {
     public void onDestroy() {
         unregisterReceiver(mNotificationActionsReceiver);
         mScheduler.shutdownNow();
+        if (mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
         super.onDestroy();
     }
 
@@ -140,6 +151,7 @@ public class MathEngineService extends Service {
         return mResults;
     }
 
+    @SuppressLint("WakelockTimeout")
     private void calculate(@NonNull MathQuestion mathQuestion) {
         mPendingTasks.add(mathQuestion);
         updateNotificationContent();
@@ -150,6 +162,8 @@ public class MathEngineService extends Service {
         if (mIdlingResource != null) {
             mIdlingResource.increment();
         }
+        // Acquire the lock only when we schedule tasks, and release it when all tasks complete
+        mWakeLock.acquire();
         mScheduler.schedule(new Task(mathQuestion), mathQuestion.getDelayTime(), TimeUnit.SECONDS);
     }
 
@@ -180,6 +194,10 @@ public class MathEngineService extends Service {
             mNotificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
             if (mIdlingResource != null) {
                 mIdlingResource.decrement();
+            }
+            // If there are no pending operations, release the wake lock to avoid draining the battery
+            if (mPendingTasks.isEmpty() && mWakeLock.isHeld()) {
+                mWakeLock.release();
             }
         });
     }
