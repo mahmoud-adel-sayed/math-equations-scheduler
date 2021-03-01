@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.va.android.task.R;
 import com.va.android.task.implementation.java.data.model.MathAnswer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -19,7 +20,7 @@ import butterknife.ButterKnife;
 public class OperationsResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<MathAnswer> mMathAnswers;
 
-    public OperationsResultsAdapter(List<MathAnswer> mathAnswers) {
+    public OperationsResultsAdapter(@NonNull List<MathAnswer> mathAnswers) {
         super();
         mMathAnswers = mathAnswers;
     }
@@ -44,7 +45,7 @@ public class OperationsResultsAdapter extends RecyclerView.Adapter<RecyclerView.
     }
 
     public void replaceData(@NonNull List<MathAnswer> mathAnswers) {
-        mMathAnswers = mathAnswers;
+        mMathAnswers = new ArrayList<>(mathAnswers);
         notifyDataSetChanged();
     }
 
