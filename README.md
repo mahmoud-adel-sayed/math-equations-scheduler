@@ -9,9 +9,6 @@ This is a sample app that communicates with a math engine service to perform som
 5. The background service will be restarted after being destroyed by the OS, and I am considering to add a mechanism to restart the service after device rebooting (we could use the Android AlarmManager API or by scheduling a periodic background job to check that the service is running and restart it if needed).
 6. Unit & Instrumentation Tests code is written in **Kotlin**.
 
-### Known Issues
-* The background service pending operations (time drift in Android Doze Mode)
-
 ### Build & Installation Instructions
 There are two gradle custom tasks that could be used to clean, build, and install the app, one for the QA flavor and the other for the Prod flavor
 * On Windows, run the following commands in a terminal window:
