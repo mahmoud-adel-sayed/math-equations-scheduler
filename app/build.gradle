@@ -97,6 +97,7 @@ dependencies {
     // Android unit tests
     androidTestImplementation "junit:junit:$junitVersion"
     androidTestImplementation "org.mockito:mockito-core:$mockitoVersion"
+    androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
     androidTestImplementation "androidx.test:core-ktx:$testCoreVersion"
     androidTestImplementation "androidx.test.ext:junit-ktx:$testExtKotlinRunnerVersion"
     androidTestImplementation "androidx.test:rules:$testRulesVersion"

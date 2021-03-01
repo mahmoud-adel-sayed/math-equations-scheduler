@@ -14,11 +14,12 @@ import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.Matcher
 import org.hamcrest.core.AllOf.allOf
 import org.hamcrest.core.AnyOf.anyOf
+import org.mockito.Mockito
 
 class RecyclerViewItemCountAssertion(private val expectedCount: Int) : ViewAssertion {
     override fun check(view: View?, noViewFoundException: NoMatchingViewException?) {
         if (noViewFoundException != null) {
-            throw noViewFoundException;
+            throw noViewFoundException
         }
         val recyclerView = view as RecyclerView
         val adapter = recyclerView.adapter
@@ -59,3 +60,5 @@ private class NestedScrollToAction(
             ))
     ))
 }
+
+inline fun <reified T> mock(): T = Mockito.mock(T::class.java)
