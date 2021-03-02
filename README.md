@@ -5,9 +5,9 @@ This is a sample app that communicates with a math engine service to perform som
 1. The code is written in **Java** and relies on the java concurrent package for scheduling tasks in a thread pool, other implementations could rely on Rxjava or WorkManager libraries.
 2. The project is **simply structured** but in a real project we should consider using some well known archetectures like (_MVVM_ or _MVP_).
 3. The app UI is simple and represented by single *Activity*, but could be splitted it into multiple *Fragments*.
-4. I am going to add another implementation using **Kotlin & coroutines**.
-5. The background service will be restarted after being destroyed by the OS, and I am considering to add a mechanism to restart the service after device rebooting (we could use the Android AlarmManager API or by scheduling a periodic background job to check that the service is running and restart it if needed).
-6. Unit & Instrumentation Tests code is written in **Kotlin**.
+4. The background service will be restarted after being destroyed by the OS or after device boot.
+5. Unit & Instrumentation Tests code is written in **Kotlin**.
+6. I am going to add another implementation using **Kotlin & coroutines**.
 
 ### Build & Installation Instructions
 There are two gradle custom tasks that could be used to clean, build, and install the app, one for the QA flavor and the other for the Prod flavor
