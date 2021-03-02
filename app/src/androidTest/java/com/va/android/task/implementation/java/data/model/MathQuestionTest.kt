@@ -1,11 +1,9 @@
-package com.va.android.task
+package com.va.android.task.implementation.java.data.model
 
 import android.os.Parcel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
-import com.va.android.task.implementation.java.data.model.MathQuestion
-import com.va.android.task.implementation.java.data.model.Operator
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

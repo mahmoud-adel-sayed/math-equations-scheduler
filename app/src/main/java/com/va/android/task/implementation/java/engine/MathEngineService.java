@@ -1,6 +1,5 @@
 package com.va.android.task.implementation.java.engine;
 
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -11,47 +10,49 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 
 import com.va.android.task.BuildConfig;
 import com.va.android.task.R;
 import com.va.android.task.implementation.java.App;
 import com.va.android.task.implementation.java.data.model.MathAnswer;
 import com.va.android.task.implementation.java.data.model.MathQuestion;
-import com.va.android.task.implementation.java.data.model.Operator;
 import com.va.android.task.implementation.java.util.SimpleCountingIdlingResource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 /**
  * A background service that schedules tasks to answer math questions.
  */
 public class MathEngineService extends Service {
-    private static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
-    private static final String WAKE_LOCK_TAG = "VA:MathEngineServiceWakeLockTag";
+    private static final String ARITHMETIC_WORK_TAG = "ARITHMETIC_WORK_TAG";
     private static final int NOTIFICATION_ID = 1;
 
-    public static final String ACTION_CALCULATE = PACKAGE_NAME + ".engine.action.CALCULATE";
-    public static final String ACTION_CANCEL_ALL = PACKAGE_NAME + ".engine.action.CANCEL_ALL";
-    public static final String KEY_MATH_QUESTION = "KEY_MATH_QUESTION";
+    private static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
+    private static final String ACTION_CALCULATE = PACKAGE_NAME + ".engine.action.CALCULATE";
+    private static final String ACTION_RESULT = PACKAGE_NAME + ".engine.action.RESULT";
+    private static final String ACTION_CANCEL_ALL = PACKAGE_NAME + ".engine.action.CANCEL_ALL";
+
+    private static final String KEY_MATH_QUESTION = "KEY_MATH_QUESTION";
+    private static final String KEY_OPERATION_ID = "KEY_OPERATION_ID";
+    private static final String KEY_RESULT = "KEY_RESULT";
 
     private final IBinder mBinder = new LocalBinder();
     private final List<Listener> mListeners = new ArrayList<>();
 
-    private ScheduledExecutorService mScheduler;
-    private WakeLock mWakeLock;
+    private WorkManager mWorkManager;
     private Handler mMainThreadHandler;
     private List<MathQuestion> mPendingTasks;
     private List<MathAnswer> mResults;
@@ -73,14 +74,11 @@ public class MathEngineService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mScheduler = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+        mWorkManager = WorkManager.getInstance(getApplicationContext());
         mMainThreadHandler = new Handler(Looper.getMainLooper());
         mPendingTasks = new CopyOnWriteArrayList<>();
         mResults = new CopyOnWriteArrayList<>();
         mIdlingResource = ((App)getApplication()).getIdlingResource();
-
-        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK_TAG);
 
         mNotificationActionsReceiver = new NotificationActionsReceiver();
         IntentFilter filter = new IntentFilter();
@@ -104,7 +102,12 @@ public class MathEngineService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && ACTION_CALCULATE.equals(intent.getAction())) {
             MathQuestion mathQuestion = intent.getParcelableExtra(KEY_MATH_QUESTION);
-            calculate(mathQuestion);
+            handleMathQuestion(mathQuestion);
+        }
+        else if (intent != null && ACTION_RESULT.equals(intent.getAction())) {
+            String operationId = intent.getStringExtra(KEY_OPERATION_ID);
+            String result = intent.getStringExtra(KEY_RESULT);
+            handleResult(operationId, result);
         }
         // If killed, restart
         return START_STICKY;
@@ -113,10 +116,7 @@ public class MathEngineService extends Service {
     @Override
     public void onDestroy() {
         unregisterReceiver(mNotificationActionsReceiver);
-        mScheduler.shutdownNow();
-        if (mWakeLock.isHeld()) {
-            mWakeLock.release();
-        }
+        mWorkManager.cancelAllWorkByTag(ARITHMETIC_WORK_TAG);
         super.onDestroy();
     }
 
@@ -134,6 +134,30 @@ public class MathEngineService extends Service {
             // Return this instance of LocalService so clients can call public methods
             return MathEngineService.this;
         }
+    }
+
+    public static void start(@NonNull Context c) {
+        c.startService(new Intent(c, MathEngineService.class));
+    }
+
+    public static void calculate(@NonNull Context c, @NonNull MathQuestion mathQuestion) {
+        c.startService(createIntent(c, mathQuestion));
+    }
+
+    @VisibleForTesting
+    static Intent createIntent(@NonNull Context c, @NonNull MathQuestion mathQuestion) {
+        Intent intent = new Intent(c, MathEngineService.class);
+        intent.setAction(ACTION_CALCULATE);
+        intent.putExtra(KEY_MATH_QUESTION, mathQuestion);
+        return intent;
+    }
+
+    public static void showResult(@NonNull Context c, String operationId, String result) {
+        Intent intent = new Intent(c, MathEngineService.class);
+        intent.setAction(ACTION_RESULT);
+        intent.putExtra(KEY_OPERATION_ID, operationId);
+        intent.putExtra(KEY_RESULT, result);
+        c.startService(intent);
     }
 
     public void addListener(@NonNull Listener listener) {
@@ -154,8 +178,7 @@ public class MathEngineService extends Service {
         return mResults;
     }
 
-    @SuppressLint("WakelockTimeout")
-    private void calculate(@NonNull MathQuestion mathQuestion) {
+    private void handleMathQuestion(@NonNull MathQuestion mathQuestion) {
         mPendingTasks.add(mathQuestion);
         updateNotificationContent();
         startForeground(NOTIFICATION_ID, mNotificationBuilder.build());
@@ -165,9 +188,40 @@ public class MathEngineService extends Service {
         if (mIdlingResource != null) {
             mIdlingResource.increment();
         }
-        // Acquire the lock only when we schedule tasks, and release it when all tasks complete
-        mWakeLock.acquire();
-        mScheduler.schedule(new Task(mathQuestion), mathQuestion.getDelayTime(), TimeUnit.SECONDS);
+        // Enqueue work
+        WorkRequest workRequest = new OneTimeWorkRequest.Builder(ArithmeticWorker.class)
+                .setInputData(getWorkInputData(mathQuestion))
+                .setInitialDelay(mathQuestion.getDelayTime(), TimeUnit.SECONDS)
+                .addTag(ARITHMETIC_WORK_TAG)
+                .build();
+        mWorkManager.enqueue(workRequest);
+    }
+
+    private void handleResult(String operationId, String result) {
+        MathQuestion mathQuestion = findMathQuestion(operationId);
+        if (mathQuestion != null) {
+            mResults.add(new MathAnswer(result));
+            mPendingTasks.remove(mathQuestion);
+            notifyAndUpdateNotification();
+        }
+    }
+
+    @Nullable
+    private MathQuestion findMathQuestion(String operationId) {
+        for (MathQuestion mathQuestion : mPendingTasks) {
+            if (mathQuestion.getOperationId().equals(operationId))
+                return mathQuestion;
+        }
+        return null;
+    }
+
+    private static Data getWorkInputData(MathQuestion mathQuestion) {
+        return new Data.Builder()
+                .putString(ArithmeticWorker.KEY_OPERATION_ID, mathQuestion.getOperationId())
+                .putDouble(ArithmeticWorker.KEY_FIRST_OPERAND, mathQuestion.getFirstOperand())
+                .putDouble(ArithmeticWorker.KEY_SECOND_OPERAND, mathQuestion.getSecondOperand())
+                .putInt(ArithmeticWorker.KEY_OPERATOR_ORDINAL, mathQuestion.getOperator().ordinal())
+                .build();
     }
 
     private void updateNotificationContent() {
@@ -198,32 +252,7 @@ public class MathEngineService extends Service {
             if (mIdlingResource != null) {
                 mIdlingResource.decrement();
             }
-            // If there are no pending operations, release the wake lock to avoid draining the battery
-            if (mPendingTasks.isEmpty() && mWakeLock.isHeld()) {
-                mWakeLock.release();
-            }
         });
-    }
-
-    private final class Task implements Runnable {
-        private final MathQuestion mathQuestion;
-
-        private Task(MathQuestion mathQuestion) {
-            this.mathQuestion = mathQuestion;
-        }
-
-        @Override
-        public void run() {
-            double first = mathQuestion.getFirstOperand();
-            double second = mathQuestion.getSecondOperand();
-            Operator operator = mathQuestion.getOperator();
-            String result = String.format(Locale.US, "%.2f %s %.2f = %.2f",
-                    first, operator.symbol(), second, operator.compute(first, second)
-            );
-            mResults.add(new MathAnswer(result));
-            mPendingTasks.remove(mathQuestion);
-            notifyAndUpdateNotification();
-        }
     }
 
     private final class NotificationActionsReceiver extends BroadcastReceiver {
@@ -235,6 +264,8 @@ public class MathEngineService extends Service {
                     listener.onNotificationActionCancelAllClick();
                 }
                 stopForeground(true);
+                mWorkManager.cancelAllWorkByTag(ARITHMETIC_WORK_TAG);
+                mPendingTasks.clear();
                 stopSelf();
             }
         }

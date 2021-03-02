@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         createLocationRequest();
         buildLocationSettingsRequest();
 
-        startService(new Intent(this, MathEngineService.class));
+        MathEngineService.start(this);
     }
 
     @Override
@@ -482,10 +482,7 @@ public class MainActivity extends AppCompatActivity {
 
         MathQuestion mathQuestion =
                 new MathQuestion(firstOperand, secondOperand, mSelectedOperator, delayTime);
-        Intent intent = new Intent(this, MathEngineService.class);
-        intent.setAction(MathEngineService.ACTION_CALCULATE);
-        intent.putExtra(MathEngineService.KEY_MATH_QUESTION, mathQuestion);
-        startService(intent);
+        MathEngineService.calculate(this, mathQuestion);
 
         clearInputs();
     }

@@ -1,4 +1,4 @@
-package com.va.android.task
+package com.va.android.task.implementation.java.engine
 
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
@@ -7,7 +7,7 @@ import androidx.test.filters.MediumTest
 import androidx.test.rule.ServiceTestRule
 import com.va.android.task.implementation.java.data.model.MathQuestion
 import com.va.android.task.implementation.java.data.model.Operator
-import com.va.android.task.implementation.java.engine.MathEngineService
+import com.va.android.task.mock
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertEquals
@@ -45,9 +45,9 @@ class MathEngineServiceTest {
         }
         service.addListener(listener)
 
-        val delay = 2L
+        val delay = 5L
         val mathQuestion = MathQuestion(1.0, 1.0, Operator.ADD, delay)
-        serviceRule.startService(createStartIntent(mathQuestion))
+        serviceRule.startService(MathEngineService.createIntent(getApplicationContext(), mathQuestion))
 
         latch.await(delay + 1, TimeUnit.SECONDS)
         assertThat(service.pendingOperations.size, `is`(equalTo(0)))
@@ -61,7 +61,7 @@ class MathEngineServiceTest {
         // Send another question
         listener = mock()
         service.addListener(listener)
-        serviceRule.startService(createStartIntent(mathQuestion))
+        serviceRule.startService(MathEngineService.createIntent(getApplicationContext(), mathQuestion))
 
         // Test interaction with the listener
         verify(listener).onPendingOperationsChanged()
@@ -75,12 +75,6 @@ class MathEngineServiceTest {
         val binder = serviceRule.bindService(intent)
         return (binder as MathEngineService.LocalBinder).service
     }
-
-    private fun createStartIntent(mathQuestion: MathQuestion): Intent =
-        Intent(getApplicationContext(), MathEngineService::class.java).apply {
-            action = MathEngineService.ACTION_CALCULATE
-            putExtra(MathEngineService.KEY_MATH_QUESTION, mathQuestion)
-        }
 
     private fun answer(mathQuestion: MathQuestion) = String.format(
             Locale.US,

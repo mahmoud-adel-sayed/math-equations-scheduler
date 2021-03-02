@@ -38,6 +38,7 @@ ext {
     materialVersion = "1.2.1"
     locationServicesVersion = "17.0.0"
     butterknifeVersion = "10.1.0"
+    workVersion = "2.5.0"
 
     // Local & Instrumentation Testing Dependencies
     junitVersion = '4.12'

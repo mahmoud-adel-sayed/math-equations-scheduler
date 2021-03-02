@@ -1,7 +1,6 @@
-package com.va.android.task
+package com.va.android.task.implementation.java.data.model
 
 import androidx.test.filters.SmallTest
-import com.va.android.task.implementation.java.data.model.Operator
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertThat

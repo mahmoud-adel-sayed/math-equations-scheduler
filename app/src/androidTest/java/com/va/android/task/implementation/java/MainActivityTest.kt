@@ -1,4 +1,4 @@
-package com.va.android.task
+package com.va.android.task.implementation.java
 
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario.launch
@@ -13,9 +13,11 @@ import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import com.va.android.task.implementation.java.App
-import com.va.android.task.implementation.java.MainActivity
+import com.va.android.task.R
+import com.va.android.task.RecyclerViewItemCountAssertion
 import com.va.android.task.implementation.java.data.model.Operator
+import com.va.android.task.nestedScrollTo
+import com.va.android.task.selectTabAtPosition
 import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Before
@@ -110,7 +112,7 @@ class MainActivityTest {
         onView(withId(R.id.btn_calculate)).perform(click())
 
         // Wait for the service to handle the intent.
-        Thread.sleep(500)
+        Thread.sleep(200)
 
         // After the operation has finished.
         // Scroll to the tabs, select pending tab, check no pending operations.

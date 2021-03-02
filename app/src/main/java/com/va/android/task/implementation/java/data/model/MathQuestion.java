@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import androidx.annotation.NonNull;
 
@@ -12,7 +13,8 @@ import androidx.annotation.NonNull;
  */
 public final class MathQuestion implements Parcelable {
 
-    private final long operationId;
+    @NonNull
+    private final String operationId;
     private final double firstOperand;
     private final double secondOperand;
     private final Operator operator;
@@ -28,7 +30,7 @@ public final class MathQuestion implements Parcelable {
      */
     public MathQuestion(double firstOperand, double secondOperand, Operator operator,
                         long delayTime) {
-        operationId = System.currentTimeMillis();
+        operationId = UUID.randomUUID().toString();
         this.firstOperand = firstOperand;
         this.secondOperand = secondOperand;
         this.operator = operator;
@@ -36,7 +38,7 @@ public final class MathQuestion implements Parcelable {
     }
 
     private MathQuestion(Parcel in) {
-        operationId = in.readLong();
+        operationId = in.readString();
         firstOperand = in.readDouble();
         secondOperand = in.readDouble();
         operator = Operator.values()[in.readInt()];
@@ -48,8 +50,8 @@ public final class MathQuestion implements Parcelable {
      *
      * @return The operation id.
      */
-    @SuppressWarnings("unused")
-    public long getOperationId() {
+    @NonNull
+    public String getOperationId() {
         return operationId;
     }
 
@@ -108,16 +110,15 @@ public final class MathQuestion implements Parcelable {
         if (o.getClass() != this.getClass()) return false;
 
         MathQuestion other = (MathQuestion) o;
-        return (other.operationId == operationId &&
+        return (other.operationId.equals(operationId) &&
                 other.firstOperand == firstOperand &&
                 other.secondOperand == secondOperand &&
-                other.operator == operator &&
-                other.delayTime == delayTime);
+                other.operator == operator);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(operationId, firstOperand, secondOperand, operator, delayTime);
+        return Objects.hash(operationId, firstOperand, secondOperand, operator);
     }
 
     @Override
@@ -127,7 +128,7 @@ public final class MathQuestion implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(operationId);
+        dest.writeString(operationId);
         dest.writeDouble(firstOperand);
         dest.writeDouble(secondOperand);
         dest.writeInt(operator.ordinal());
