@@ -35,6 +35,9 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+/**
+ * A background service that schedules tasks to answer math questions.
+ */
 public class MathEngineService extends Service {
     private static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
     private static final String WAKE_LOCK_TAG = "VA:MathEngineServiceWakeLockTag";
