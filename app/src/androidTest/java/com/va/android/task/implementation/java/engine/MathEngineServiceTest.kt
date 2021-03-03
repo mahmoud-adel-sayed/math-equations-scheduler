@@ -55,7 +55,7 @@ class MathEngineServiceTest {
         assertEquals(service.operationsResults[0].result, answer(mathQuestion))
 
         // Reset
-        service.operationsResults.clear()
+        service.results.clear()
         service.removeListener(listener)
 
         // Send another question

@@ -177,6 +177,11 @@ public class MathEngineService extends Service {
         return new ArrayList<>(mResults);
     }
 
+    @VisibleForTesting
+    List<MathAnswer> getResults() {
+        return mResults;
+    }
+
     private void handleMathQuestion(@NonNull MathQuestion mathQuestion) {
         mPendingTasks.add(mathQuestion);
         updateNotificationContent();
