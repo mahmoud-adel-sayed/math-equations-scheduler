@@ -1,0 +1,58 @@
+package com.va.android.task.implementation.kotlin.engine
+
+import android.content.Context
+import androidx.work.Data
+import androidx.work.Worker
+import androidx.work.WorkerParameters
+import com.va.android.task.implementation.kotlin.engine.data.MathQuestion
+import com.va.android.task.implementation.kotlin.engine.data.Operator
+import java.util.*
+
+class ArithmeticWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+
+    companion object {
+        private const val KEY_OPERATION_ID = "KEY_OPERATION_ID"
+        private const val KEY_FIRST_OPERAND = "KEY_FIRST_OPERAND"
+        private const val KEY_SECOND_OPERAND = "KEY_SECOND_OPERAND"
+        private const val KEY_OPERATOR_ORDINAL = "KEY_OPERATOR_ORDINAL"
+
+        internal const val KEY_RESULT = "key_result"
+
+        internal fun MathQuestion.getWorkInputData(): Data = Data.Builder()
+                .putString(KEY_OPERATION_ID, operationId)
+                .putDouble(KEY_FIRST_OPERAND, firstOperand)
+                .putDouble(KEY_SECOND_OPERAND, secondOperand)
+                .putInt(KEY_OPERATOR_ORDINAL, operator.ordinal)
+                .build()
+    }
+
+    override fun doWork(): Result {
+        return try {
+            val data = inputData
+            if (!data.valid()) {
+                Result.failure()
+            }
+            val first = data.getDouble(KEY_FIRST_OPERAND, 0.0)
+            val second = data.getDouble(KEY_SECOND_OPERAND, 0.0)
+            val operatorOrdinal = data.getInt(KEY_OPERATOR_ORDINAL, 0)
+            val operator = Operator.values()[operatorOrdinal]
+
+            val operationId = data.getString(KEY_OPERATION_ID)
+            val result = String.format(Locale.US, "%.2f %s %.2f = %.2f",
+                    first, operator.symbol, second, operator.compute(first, second)
+            )
+
+            MathEngineService.showResult(applicationContext, operationId!!, result)
+            Result.success(Data.Builder().putString(KEY_RESULT, result).build())
+        } catch (e: Exception) {
+            Result.failure()
+        }
+    }
+
+    private fun Data.valid(): Boolean {
+        return hasKeyWithValueOfType(KEY_FIRST_OPERAND, Double::class.java) &&
+               hasKeyWithValueOfType(KEY_SECOND_OPERAND, Double::class.java) &&
+               hasKeyWithValueOfType(KEY_OPERATOR_ORDINAL, Integer::class.java) &&
+               getString(KEY_OPERATION_ID) != null
+    }
+}
