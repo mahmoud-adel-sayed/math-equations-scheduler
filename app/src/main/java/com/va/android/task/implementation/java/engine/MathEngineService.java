@@ -20,7 +20,6 @@ import com.va.android.task.implementation.java.util.SimpleCountingIdlingResource
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
@@ -76,8 +75,8 @@ public class MathEngineService extends Service {
 
         mWorkManager = WorkManager.getInstance(getApplicationContext());
         mMainThreadHandler = new Handler(Looper.getMainLooper());
-        mPendingTasks = new CopyOnWriteArrayList<>();
-        mResults = new CopyOnWriteArrayList<>();
+        mPendingTasks = new ArrayList<>();
+        mResults = new ArrayList<>();
         mIdlingResource = ((App)getApplication()).getIdlingResource();
 
         mNotificationActionsReceiver = new NotificationActionsReceiver();
@@ -170,12 +169,12 @@ public class MathEngineService extends Service {
 
     @NonNull
     public List<MathQuestion> getPendingOperations() {
-        return mPendingTasks;
+        return new ArrayList<>(mPendingTasks);
     }
 
     @NonNull
     public List<MathAnswer> getOperationsResults() {
-        return mResults;
+        return new ArrayList<>(mResults);
     }
 
     private void handleMathQuestion(@NonNull MathQuestion mathQuestion) {

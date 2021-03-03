@@ -112,17 +112,14 @@ public class MainActivity extends AppCompatActivity {
 
     // Service
     private MathEngineService mServiceReference;
-    private boolean mIsBound, mIsDataPopulated;
+    private boolean mIsBound;
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mServiceReference = ((MathEngineService.LocalBinder) service).getService();
             mServiceReference.addListener(mServiceListener);
-            if (!mIsDataPopulated) {
-                mPendingOperationsAdapter.replaceData(mServiceReference.getPendingOperations());
-                mOperationsResultsAdapter.replaceData(mServiceReference.getOperationsResults());
-                mIsDataPopulated = true;
-            }
+            mPendingOperationsAdapter.replaceData(mServiceReference.getPendingOperations());
+            mOperationsResultsAdapter.replaceData(mServiceReference.getOperationsResults());
             mIsBound = true;
         }
 
@@ -153,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
         setupTabs();
         setupPendingOperations();
         setupOperationsResults();
-        mIsDataPopulated = false;
 
         mRequestingLocationUpdates = false;
         updateValuesFromBundle(savedInstanceState);

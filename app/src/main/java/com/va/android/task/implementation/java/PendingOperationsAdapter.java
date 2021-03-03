@@ -9,7 +9,6 @@ import android.widget.TextView;
 import com.va.android.task.R;
 import com.va.android.task.implementation.java.data.model.MathQuestion;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -47,7 +46,7 @@ public class PendingOperationsAdapter extends RecyclerView.Adapter<RecyclerView.
     }
 
     public void replaceData(@NonNull List<MathQuestion> mathQuestions) {
-        mMathQuestions = new ArrayList<>(mathQuestions);
+        mMathQuestions = mathQuestions;
         notifyDataSetChanged();
     }
 
