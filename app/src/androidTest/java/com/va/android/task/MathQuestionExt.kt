@@ -1,6 +1,6 @@
 package com.va.android.task
 
-import com.va.android.task.implementation.java.data.model.MathQuestion
+import com.va.android.task.implementation.java.engine.data.model.MathQuestion
 import java.util.*
 
 fun MathQuestion.answer() = String.format(

@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.va.android.task.R;
-import com.va.android.task.implementation.java.data.model.MathQuestion;
+import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
 
 import java.util.List;
 import java.util.Locale;

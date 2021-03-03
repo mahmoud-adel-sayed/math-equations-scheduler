@@ -15,7 +15,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.va.android.task.R
 import com.va.android.task.RecyclerViewItemCountAssertion
-import com.va.android.task.implementation.java.data.model.Operator
+import com.va.android.task.implementation.java.engine.data.model.Operator
 import com.va.android.task.nestedScrollTo
 import com.va.android.task.selectTabAtPosition
 import org.hamcrest.Matchers.not

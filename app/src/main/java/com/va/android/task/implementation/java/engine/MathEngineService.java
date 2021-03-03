@@ -14,8 +14,8 @@ import android.os.Looper;
 import com.va.android.task.BuildConfig;
 import com.va.android.task.R;
 import com.va.android.task.implementation.java.App;
-import com.va.android.task.implementation.java.data.model.MathAnswer;
-import com.va.android.task.implementation.java.data.model.MathQuestion;
+import com.va.android.task.implementation.java.engine.data.model.MathAnswer;
+import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
 import com.va.android.task.implementation.java.util.SimpleCountingIdlingResource;
 
 import java.util.ArrayList;

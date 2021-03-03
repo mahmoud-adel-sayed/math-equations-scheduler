@@ -6,10 +6,10 @@ import androidx.work.WorkInfo
 import androidx.work.testing.WorkManagerTestInitHelper
 import com.va.android.task.WorkManagerTestRule
 import com.va.android.task.answer
-import com.va.android.task.implementation.java.data.model.MathQuestion
-import com.va.android.task.implementation.java.data.model.Operator
 import com.va.android.task.implementation.java.engine.ArithmeticWorker.KEY_RESULT
 import com.va.android.task.implementation.java.engine.ArithmeticWorker.getWorkInputData
+import com.va.android.task.implementation.java.engine.data.model.MathQuestion
+import com.va.android.task.implementation.java.engine.data.model.Operator
 import org.hamcrest.Matchers.`is`
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThat

@@ -2,8 +2,8 @@ package com.va.android.task.implementation.java.engine;
 
 import android.content.Context;
 
-import com.va.android.task.implementation.java.data.model.MathQuestion;
-import com.va.android.task.implementation.java.data.model.Operator;
+import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
+import com.va.android.task.implementation.java.engine.data.model.Operator;
 
 import java.util.Locale;
 

@@ -1,4 +1,4 @@
-package com.va.android.task.implementation.java.data.model;
+package com.va.android.task.implementation.java.engine.data.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

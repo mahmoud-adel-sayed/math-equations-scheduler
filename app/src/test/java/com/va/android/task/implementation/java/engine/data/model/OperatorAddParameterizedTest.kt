@@ -1,4 +1,4 @@
-package com.va.android.task.implementation.java.data.model
+package com.va.android.task.implementation.java.engine.data.model
 
 import androidx.test.filters.SmallTest
 import org.hamcrest.CoreMatchers.`is`
@@ -11,7 +11,7 @@ import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)
 @SmallTest
-class OperatorDivideParameterizedTest(
+class OperatorAddParameterizedTest(
         private val firstOperand: Double,
         private val secondOperand: Double,
         private val expectedResult: Double
@@ -20,17 +20,16 @@ class OperatorDivideParameterizedTest(
         @Parameters
         @JvmStatic
         fun data(): Iterable<Array<Any>> = listOf(
-                arrayOf<Any>(4, 4, 1),
-                arrayOf<Any>(-4, -4, 1),
-                arrayOf<Any>(2, -2, -1),
-                arrayOf<Any>(0, 3, 0),
-                arrayOf<Any>(5.0, 2.0, 2.5)
+                arrayOf<Any>(0, 0, 0),
+                arrayOf<Any>(0, -1, -1),
+                arrayOf<Any>(2, 2, 4),
+                arrayOf<Any>(2, 0, 2)
         )
     }
 
     @Test
-    fun divideTwoNumbers() {
-        val result = Operator.DIVIDE.compute(firstOperand, secondOperand)
+    fun addTwoNumbers() {
+        val result = Operator.ADD.compute(firstOperand, secondOperand)
         assertThat(result, `is`(equalTo(expectedResult)))
     }
 }

@@ -39,8 +39,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.va.android.task.BuildConfig;
 import com.va.android.task.R;
-import com.va.android.task.implementation.java.data.model.MathQuestion;
-import com.va.android.task.implementation.java.data.model.Operator;
+import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
+import com.va.android.task.implementation.java.engine.data.model.Operator;
 import com.va.android.task.implementation.java.engine.MathEngineService;
 
 import java.util.ArrayList;

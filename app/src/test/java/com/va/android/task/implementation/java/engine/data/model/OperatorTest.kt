@@ -1,4 +1,4 @@
-package com.va.android.task.implementation.java.data.model
+package com.va.android.task.implementation.java.engine.data.model
 
 import androidx.test.filters.SmallTest
 import org.hamcrest.CoreMatchers.`is`

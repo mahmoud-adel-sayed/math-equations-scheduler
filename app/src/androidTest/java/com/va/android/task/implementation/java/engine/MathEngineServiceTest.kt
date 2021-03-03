@@ -6,8 +6,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import androidx.test.rule.ServiceTestRule
 import com.va.android.task.answer
-import com.va.android.task.implementation.java.data.model.MathQuestion
-import com.va.android.task.implementation.java.data.model.Operator
+import com.va.android.task.implementation.java.engine.data.model.MathQuestion
+import com.va.android.task.implementation.java.engine.data.model.Operator
 import com.va.android.task.mock
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
