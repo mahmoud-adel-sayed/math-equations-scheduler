@@ -27,7 +27,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
@@ -151,7 +150,7 @@ public class MathEngineService extends Service {
         return intent;
     }
 
-    public static void showResult(@NonNull Context c, String operationId, String result) {
+    static void showResult(@NonNull Context c, String operationId, String result) {
         Intent intent = new Intent(c, MathEngineService.class);
         intent.setAction(ACTION_RESULT);
         intent.putExtra(KEY_OPERATION_ID, operationId);
@@ -178,6 +177,11 @@ public class MathEngineService extends Service {
     }
 
     @VisibleForTesting
+    List<MathQuestion> getPending() {
+        return mPendingTasks;
+    }
+
+    @VisibleForTesting
     List<MathAnswer> getResults() {
         return mResults;
     }
@@ -194,7 +198,7 @@ public class MathEngineService extends Service {
         }
         // Enqueue work
         WorkRequest workRequest = new OneTimeWorkRequest.Builder(ArithmeticWorker.class)
-                .setInputData(getWorkInputData(mathQuestion))
+                .setInputData(ArithmeticWorker.getWorkInputData(mathQuestion))
                 .setInitialDelay(mathQuestion.getDelayTime(), TimeUnit.SECONDS)
                 .addTag(ARITHMETIC_WORK_TAG)
                 .build();
@@ -217,15 +221,6 @@ public class MathEngineService extends Service {
                 return mathQuestion;
         }
         return null;
-    }
-
-    private static Data getWorkInputData(MathQuestion mathQuestion) {
-        return new Data.Builder()
-                .putString(ArithmeticWorker.KEY_OPERATION_ID, mathQuestion.getOperationId())
-                .putDouble(ArithmeticWorker.KEY_FIRST_OPERAND, mathQuestion.getFirstOperand())
-                .putDouble(ArithmeticWorker.KEY_SECOND_OPERAND, mathQuestion.getSecondOperand())
-                .putInt(ArithmeticWorker.KEY_OPERATOR_ORDINAL, mathQuestion.getOperator().ordinal())
-                .build();
     }
 
     private void updateNotificationContent() {

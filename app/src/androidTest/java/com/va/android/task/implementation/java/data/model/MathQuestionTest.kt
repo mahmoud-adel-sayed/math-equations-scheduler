@@ -30,7 +30,7 @@ class MathQuestionTest {
     }
 
     @Test
-    fun mathQuestion_ReadWriteParcelable() {
+    fun mathQuestion_readWriteParcelable() {
         // Write
         val parcel = Parcel.obtain()
         mathQuestion.writeToParcel(parcel, mathQuestion.describeContents())
