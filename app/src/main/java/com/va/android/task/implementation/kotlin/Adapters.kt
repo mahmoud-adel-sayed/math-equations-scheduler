@@ -12,10 +12,9 @@ import com.va.android.task.R
 import com.va.android.task.implementation.kotlin.engine.data.MathAnswer
 import com.va.android.task.implementation.kotlin.engine.data.MathQuestion
 import java.util.*
-import kotlin.collections.ArrayList
 
 class OperationsResultsAdapter(
-        private var mathAnswers: List<MathAnswer> = ArrayList(initialCapacity = 0)
+        private var mathAnswers: List<MathAnswer> = arrayListOf()
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -47,7 +46,7 @@ class OperationsResultsAdapter(
 }
 
 class PendingOperationsAdapter(
-        private var mathQuestions: MutableList<MathQuestion> = ArrayList(initialCapacity = 0)
+        private var mathQuestions: MutableList<MathQuestion> = arrayListOf()
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
