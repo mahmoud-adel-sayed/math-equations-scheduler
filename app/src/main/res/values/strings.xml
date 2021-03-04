@@ -37,6 +37,7 @@
     <string name="err_division_by_zero">Division by zero is undefined</string>
     <string name="err_operand">Type valid operand</string>
     <string name="err_invalid_delay_time">Invalid delay time</string>
+    <string name="err_location_settings">Location settings are inadequate. Fix in Settings.</string>
     <string name="a11y_bullet">Bullet</string>
     <string name="a11y_location">Location Icon</string>
 

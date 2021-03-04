@@ -239,6 +239,5 @@ class MathEngineService : Service() {
                 stopSelf()
             }
         }
-
     }
 }

@@ -1,6 +1,5 @@
 package com.va.android.task.implementation.kotlin
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.*
@@ -11,13 +10,9 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.Looper
 import android.provider.Settings
-import android.text.TextUtils
-import android.view.Gravity
 import android.view.View
 import android.widget.*
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
@@ -27,7 +22,6 @@ import butterknife.OnItemSelected
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.va.android.task.BuildConfig
 import com.va.android.task.R
@@ -91,14 +85,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var pendingOperationsAdapter: PendingOperationsAdapter
     private lateinit var operationsResultsAdapter: OperationsResultsAdapter
-    private lateinit var selectedOperator: Operator
+    private var selectedOperator: Operator = Operator.ADD
 
     // Service
     private var serviceReference: MathEngineService? = null
     private var isBound = false
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            serviceReference = (service as MathEngineService.LocalBinder).getService()
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            serviceReference = (binder as MathEngineService.LocalBinder).getService()
             serviceReference!!.addListener(serviceListener)
             pendingOperationsAdapter.replaceData(serviceReference!!.pendingOperations)
             operationsResultsAdapter.replaceData(serviceReference!!.operationsResults)
@@ -138,7 +132,7 @@ class MainActivity : AppCompatActivity() {
         settingsClient = LocationServices.getSettingsClient(this)
         locationCallback = createLocationCallback()
         locationRequest = createLocationRequest()
-        buildLocationSettingsRequest()
+        locationSettingsRequest = createLocationSettingsRequest(locationRequest)
 
         MathEngineService.start(this)
     }
@@ -175,7 +169,7 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CHECK_SETTINGS) {
-            when(resultCode) {
+            when (resultCode) {
                 Activity.RESULT_OK -> startLocationUpdates()
                 Activity.RESULT_CANCELED -> {
                     requestingLocationUpdates = false
@@ -206,7 +200,7 @@ class MainActivity : AppCompatActivity() {
                 // again" prompts). Therefore, a user interface affordance is typically implemented
                 // when permissions are denied. Otherwise, your app could appear unresponsive to
                 // touches or interactions which have required permissions.
-                showSnackBar(R.string.permission_denied_explanation, R.string.settings) {
+                showSnackBar(root, R.string.permission_denied_explanation, R.string.settings) {
                     // Build intent that displays the App settings screen.
                     val intent = Intent().apply {
                         action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
@@ -219,37 +213,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun isLocationPermissionGranted(): Boolean {
-        val permissionState = ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-        return permissionState == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun requestLocationPermission() {
-        val shouldProvideRationale = ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION)
-        // Provide an additional rationale to the user. This would happen if the user denied the
-        // request previously, but didn't check the "Don't ask again" checkbox.
-        if (shouldProvideRationale) {
-            showSnackBar(R.string.location_permission_rationale, R.string.ok) {
-                ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                        REQUEST_PERMISSIONS_REQUEST_CODE
-                )
-            }
-        } else {
-            // Request permission. It's possible this can be auto answered if device policy
-            // sets the permission in a given state or the user denied the permission
-            // previously and checked "Never ask again".
-            ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    REQUEST_PERMISSIONS_REQUEST_CODE
-            )
-        }
-    }
-
     @OnClick(R.id.current_location_container)
     fun onCurrentLocationContainerClick() {
         if (currentLocationCB.isChecked) {
@@ -259,7 +222,7 @@ class MainActivity : AppCompatActivity() {
             currentLocation = null
         } else {
             if (!isLocationPermissionGranted()) {
-                requestLocationPermission()
+                requestLocationPermission(root, REQUEST_PERMISSIONS_REQUEST_CODE)
                 return
             }
             if (!requestingLocationUpdates) {
@@ -298,11 +261,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun buildLocationSettingsRequest() {
-        val builder = LocationSettingsRequest.Builder()
-        builder.addLocationRequest(locationRequest)
-        locationSettingsRequest = builder.build()
-    }
+    private fun createLocationSettingsRequest(request: LocationRequest): LocationSettingsRequest =
+            LocationSettingsRequest.Builder().addLocationRequest(request).build()
 
     // Suppressing the location permission here is safe because this method will never be called
     // without the permission being granted.
@@ -311,7 +271,8 @@ class MainActivity : AppCompatActivity() {
         requestingLocationUpdates = true
         setButtonsEnabled(false)
         // Begin by checking if the device has the necessary location settings.
-        settingsClient.checkLocationSettings(locationSettingsRequest).addOnSuccessListener(this) {
+        val task = settingsClient.checkLocationSettings(locationSettingsRequest)
+        task.addOnSuccessListener(this) {
             fusedLocationClient.requestLocationUpdates(
                     locationRequest, locationCallback, Looper.getMainLooper()
             )
@@ -328,9 +289,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
-                    val errorMessage =
-                            "Location settings are inadequate, and cannot be fixed here. Fix in Settings."
-                    Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+                    showToast(R.string.err_location_settings, Toast.LENGTH_LONG)
                     requestingLocationUpdates = false
                     setButtonsEnabled(true)
                 }
@@ -350,25 +309,17 @@ class MainActivity : AppCompatActivity() {
     private fun setButtonsEnabled(enabled: Boolean) {
         if (enabled) {
             currentLocationProgress.visibility = View.GONE
-            currentLocationContainer.isEnabled = true
-            currentLocationContainer.alpha = 1.0f
+            with(currentLocationContainer) {
+                isEnabled = true
+                alpha = 1.0f
+            }
         } else {
             currentLocationProgress.visibility = View.VISIBLE
-            currentLocationContainer.isEnabled = false
-            currentLocationContainer.alpha = 0.5f
+            with(currentLocationContainer) {
+                isEnabled = false
+                alpha = 0.5f
+            }
         }
-    }
-
-    private fun showSnackBar(
-            @StringRes message: Int,
-            @StringRes actionLabel: Int,
-            listener: (v: View) -> Unit
-    ) {
-        val snackBar = Snackbar.make(root, getString(message), Snackbar.LENGTH_INDEFINITE)
-        snackBar.setAction(getString(actionLabel), listener)
-        snackBar.show()
-        val tv = snackBar.view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
-        tv?.gravity = Gravity.CENTER_HORIZONTAL
     }
 
     private fun setupOperatorsSpinner() {
@@ -405,16 +356,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupPendingOperations() {
         pendingOperationsAdapter = PendingOperationsAdapter()
-        pendingOperationsRV.layoutManager =
-                LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        pendingOperationsRV.adapter = pendingOperationsAdapter
+        with(pendingOperationsRV) {
+            layoutManager = LinearLayoutManager(this@MainActivity, RecyclerView.VERTICAL, false)
+            adapter = pendingOperationsAdapter
+        }
     }
 
     private fun setupOperationsResults() {
         operationsResultsAdapter = OperationsResultsAdapter()
-        operationsResultsRV.layoutManager =
-                LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        operationsResultsRV.adapter = operationsResultsAdapter
+        with(operationsResultsRV) {
+            layoutManager = LinearLayoutManager(this@MainActivity, RecyclerView.VERTICAL, false)
+            adapter = operationsResultsAdapter
+        }
     }
 
     @OnItemSelected(R.id.spinner_operators)
@@ -427,15 +380,15 @@ class MainActivity : AppCompatActivity() {
         val firstOperand: Double
         val secondOperand: Double
         try {
-            firstOperand = firstOperandEditText.getOperand()
-            secondOperand = secondOperandEditText.getOperand()
+            firstOperand = firstOperandEditText.toDouble()
+            secondOperand = secondOperandEditText.toDouble()
         } catch (e: NumberFormatException) {
-            showToast(R.string.err_operand)
+            showToast(R.string.err_operand, Toast.LENGTH_SHORT)
             return
         }
 
         if (selectedOperator == Operator.DIVIDE && secondOperand == 0.0) {
-            showToast(R.string.err_division_by_zero)
+            showToast(R.string.err_division_by_zero, Toast.LENGTH_SHORT)
             return
         }
 
@@ -443,7 +396,7 @@ class MainActivity : AppCompatActivity() {
         try {
             delayTime = delayTimeEditText.text.toString().toLong()
         } catch (e: NumberFormatException) {
-            showToast(R.string.err_invalid_delay_time)
+            showToast(R.string.err_invalid_delay_time, Toast.LENGTH_SHORT)
             return
         }
 
@@ -456,18 +409,6 @@ class MainActivity : AppCompatActivity() {
         MathEngineService.calculate(this, mathQuestion)
 
         clearInputs()
-    }
-
-    private fun EditText.getOperand(): Double {
-        val operandText = text.toString()
-        if (TextUtils.isEmpty(operandText)) {
-            throw NumberFormatException("operand cannot be empty!")
-        }
-        return operandText.toDouble()
-    }
-
-    private fun showToast(@StringRes stringResId: Int) {
-        Toast.makeText(this, stringResId, Toast.LENGTH_SHORT).show()
     }
 
     private fun clearInputs() {
