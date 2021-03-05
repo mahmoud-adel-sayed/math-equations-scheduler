@@ -18,6 +18,7 @@ import androidx.work.WorkManager
 import com.va.android.task.BuildConfig
 import com.va.android.task.R
 import com.va.android.task.implementation.kotlin.App
+import com.va.android.task.implementation.kotlin.MainActivity
 import com.va.android.task.implementation.kotlin.engine.ArithmeticWorker.Companion.getWorkInputData
 import com.va.android.task.implementation.kotlin.engine.data.MathAnswer
 import com.va.android.task.implementation.kotlin.engine.data.MathQuestion
@@ -104,11 +105,19 @@ class MathEngineService : Service() {
         val filter = IntentFilter().apply { addAction(ACTION_CANCEL_ALL) }
         registerReceiver(notificationActionsReceiver, filter)
 
+        val pendingIntent = PendingIntent.getActivity(
+                applicationContext,
+                System.currentTimeMillis().toInt(),
+                Intent(applicationContext, MainActivity::class.java),
+                0
+        )
+
         notificationManager = NotificationManagerCompat.from(this)
         val channelId = getString(R.string.channel_engine_id)
         notificationBuilder = NotificationCompat.Builder(this, channelId)
                 .setContentTitle(getString(R.string.label_math_engine_service))
                 .setContentText(getString(R.string.engine_waiting))
+                .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.ic_va)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_LOW)

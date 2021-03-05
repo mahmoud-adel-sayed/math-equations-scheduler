@@ -14,6 +14,7 @@ import android.os.Looper;
 import com.va.android.task.BuildConfig;
 import com.va.android.task.R;
 import com.va.android.task.implementation.java.App;
+import com.va.android.task.implementation.java.MainActivity;
 import com.va.android.task.implementation.java.engine.data.model.MathAnswer;
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
 import com.va.android.task.implementation.java.util.SimpleCountingIdlingResource;
@@ -83,11 +84,19 @@ public class MathEngineService extends Service {
         filter.addAction(ACTION_CANCEL_ALL);
         registerReceiver(mNotificationActionsReceiver, filter);
 
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                (int) System.currentTimeMillis(),
+                new Intent(getApplicationContext(), MainActivity.class),
+                0
+        );
+
         mNotificationManager = NotificationManagerCompat.from(this);
         String channelId = getString(R.string.channel_engine_id);
         mNotificationBuilder = new NotificationCompat.Builder(this, channelId)
                 .setContentTitle(getString(R.string.label_math_engine_service))
                 .setContentText(getString(R.string.engine_waiting))
+                .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.ic_va)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_LOW)

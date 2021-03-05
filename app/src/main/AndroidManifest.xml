@@ -20,7 +20,9 @@
         android:theme="@style/Theme.VAComputingTask"
         tools:ignore="AllowBackup">
 
-        <activity android:name=".implementation.java.MainActivity">
+        <activity
+            android:name=".implementation.java.MainActivity"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
