@@ -194,20 +194,12 @@ class MathEngineService : Service() {
     }
 
     private fun handleResult(operationId: String, result: String) {
-        val mathQuestion = findMathQuestion(operationId)
+        val mathQuestion = pendingTasks.find { it.operationId == operationId }
         if (mathQuestion != null) {
             results.add(MathAnswer(result))
             pendingTasks.remove(mathQuestion)
             notifyAndUpdateNotification()
         }
-    }
-
-    private fun findMathQuestion(operationId: String): MathQuestion? {
-        for (mathQuestion in pendingTasks) {
-            if (mathQuestion.operationId == operationId)
-                return mathQuestion
-        }
-        return null
     }
 
     private fun updateNotificationContent() {
