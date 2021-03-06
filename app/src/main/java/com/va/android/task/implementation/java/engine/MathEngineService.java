@@ -14,7 +14,6 @@ import android.os.Looper;
 import com.va.android.task.BuildConfig;
 import com.va.android.task.R;
 import com.va.android.task.implementation.java.App;
-import com.va.android.task.implementation.java.MainActivity;
 import com.va.android.task.implementation.java.engine.data.model.MathAnswer;
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
 import com.va.android.task.implementation.java.util.SimpleCountingIdlingResource;
@@ -27,7 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
@@ -57,7 +56,6 @@ public class MathEngineService extends Service {
     private List<MathAnswer> mResults;
 
     private NotificationActionsReceiver mNotificationActionsReceiver;
-    private NotificationManagerCompat mNotificationManager;
     private NotificationCompat.Builder mNotificationBuilder;
 
     @Nullable
@@ -87,11 +85,10 @@ public class MathEngineService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 getApplicationContext(),
                 (int) System.currentTimeMillis(),
-                new Intent(getApplicationContext(), MainActivity.class),
+                new Intent(getApplicationContext(), ((App)getApplication()).getMainEntryPoint()),
                 0
         );
 
-        mNotificationManager = NotificationManagerCompat.from(this);
         String channelId = getString(R.string.channel_engine_id);
         mNotificationBuilder = new NotificationCompat.Builder(this, channelId)
                 .setContentTitle(getString(R.string.label_math_engine_service))
@@ -115,6 +112,9 @@ public class MathEngineService extends Service {
             String operationId = intent.getStringExtra(KEY_OPERATION_ID);
             String result = intent.getStringExtra(KEY_RESULT);
             handleResult(operationId, result);
+        }
+        else {
+            startForeground(NOTIFICATION_ID, mNotificationBuilder.build());
         }
         // If killed, restart
         return START_STICKY;
@@ -144,11 +144,11 @@ public class MathEngineService extends Service {
     }
 
     public static void start(@NonNull Context c) {
-        c.startService(new Intent(c, MathEngineService.class));
+        ContextCompat.startForegroundService(c, new Intent(c, MathEngineService.class));
     }
 
     public static void calculate(@NonNull Context c, @NonNull MathQuestion mathQuestion) {
-        c.startService(createIntent(c, mathQuestion));
+        ContextCompat.startForegroundService(c, createIntent(c, mathQuestion));
     }
 
     @VisibleForTesting
@@ -164,7 +164,7 @@ public class MathEngineService extends Service {
         intent.setAction(ACTION_RESULT);
         intent.putExtra(KEY_OPERATION_ID, operationId);
         intent.putExtra(KEY_RESULT, result);
-        c.startService(intent);
+        ContextCompat.startForegroundService(c, intent);
     }
 
     public void addListener(@NonNull Listener listener) {
@@ -256,7 +256,7 @@ public class MathEngineService extends Service {
                 listener.onResultsChanged();
             }
             updateNotificationContent();
-            mNotificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
+            startForeground(NOTIFICATION_ID, mNotificationBuilder.build());
             if (mIdlingResource != null) {
                 mIdlingResource.decrement();
             }

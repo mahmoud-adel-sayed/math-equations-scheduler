@@ -12,7 +12,7 @@ import android.os.IBinder
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.va.android.task.BuildConfig
@@ -44,11 +44,13 @@ class MathEngineService : Service() {
         private const val KEY_RESULT = "KEY_RESULT"
 
         @JvmStatic
-        fun start(c: Context) = c.startService(Intent(c, MathEngineService::class.java))
+        fun start(c: Context) {
+            ContextCompat.startForegroundService(c, Intent(c, MathEngineService::class.java))
+        }
 
         @JvmStatic
         fun calculate(c: Context, mathQuestion: MathQuestion) {
-            c.startService(createIntent(c, mathQuestion))
+            ContextCompat.startForegroundService(c, createIntent(c, mathQuestion))
         }
 
         @VisibleForTesting
@@ -64,7 +66,7 @@ class MathEngineService : Service() {
                 putExtra(KEY_OPERATION_ID, operationId)
                 putExtra(KEY_RESULT, result)
             }
-            c.startService(intent)
+            ContextCompat.startForegroundService(c, intent)
         }
     }
 
@@ -81,7 +83,6 @@ class MathEngineService : Service() {
     internal lateinit var results: MutableList<MathAnswer>
 
     private lateinit var notificationActionsReceiver: NotificationActionsReceiver
-    private lateinit var notificationManager: NotificationManagerCompat
     private lateinit var notificationBuilder: NotificationCompat.Builder
 
     private var idlingResource: SimpleCountingIdlingResource? = null
@@ -112,7 +113,6 @@ class MathEngineService : Service() {
                 0
         )
 
-        notificationManager = NotificationManagerCompat.from(this)
         val channelId = getString(R.string.channel_engine_id)
         notificationBuilder = NotificationCompat.Builder(this, channelId)
                 .setContentTitle(getString(R.string.label_math_engine_service))
@@ -135,6 +135,9 @@ class MathEngineService : Service() {
             val operationId = intent.getStringExtra(KEY_OPERATION_ID)
             val result = intent.getStringExtra(KEY_RESULT)
             handleResult(operationId!!, result!!)
+        }
+        else {
+            startForeground(NOTIFICATION_ID, notificationBuilder.build())
         }
         // If killed, restart
         return START_STICKY
@@ -231,7 +234,7 @@ class MathEngineService : Service() {
                 listener.onResultsChanged()
             }
             updateNotificationContent()
-            notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+            startForeground(NOTIFICATION_ID, notificationBuilder.build())
             idlingResource?.decrement()
         }
     }

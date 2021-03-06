@@ -1,6 +1,7 @@
 package com.va.android.task.implementation.java;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -41,5 +42,9 @@ public class App extends Application {
     @Nullable
     public SimpleCountingIdlingResource getIdlingResource() {
         return null;
+    }
+
+    public Class<? extends Activity> getMainEntryPoint() {
+        return MainActivity.class;
     }
 }
