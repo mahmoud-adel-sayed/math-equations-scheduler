@@ -61,7 +61,7 @@ public class MathEngineService extends Service {
     @Nullable
     private SimpleCountingIdlingResource mIdlingResource;
 
-    public interface Listener {
+    interface Listener {
         void onResultsChanged();
         void onPendingOperationsChanged();
         default void onNotificationActionCancelAllClick() { }
@@ -136,18 +136,18 @@ public class MathEngineService extends Service {
      * Class used for the client Binder. Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
-    public class LocalBinder extends Binder {
-        public MathEngineService getService() {
+    class LocalBinder extends Binder {
+        MathEngineService getService() {
             // Return this instance of LocalService so clients can call public methods
             return MathEngineService.this;
         }
     }
 
-    public static void start(@NonNull Context c) {
+    static void start(@NonNull Context c) {
         ContextCompat.startForegroundService(c, new Intent(c, MathEngineService.class));
     }
 
-    public static void calculate(@NonNull Context c, @NonNull MathQuestion mathQuestion) {
+    static void calculate(@NonNull Context c, @NonNull MathQuestion mathQuestion) {
         ContextCompat.startForegroundService(c, createIntent(c, mathQuestion));
     }
 
@@ -167,21 +167,21 @@ public class MathEngineService extends Service {
         ContextCompat.startForegroundService(c, intent);
     }
 
-    public void addListener(@NonNull Listener listener) {
+    void addListener(@NonNull Listener listener) {
         mListeners.add(listener);
     }
 
-    public void removeListener(@NonNull Listener listener) {
+    void removeListener(@NonNull Listener listener) {
         mListeners.remove(listener);
     }
 
     @NonNull
-    public List<MathQuestion> getPendingOperations() {
+    List<MathQuestion> getPendingOperations() {
         return new ArrayList<>(mPendingTasks);
     }
 
     @NonNull
-    public List<MathAnswer> getOperationsResults() {
+    List<MathAnswer> getOperationsResults() {
         return new ArrayList<>(mResults);
     }
 

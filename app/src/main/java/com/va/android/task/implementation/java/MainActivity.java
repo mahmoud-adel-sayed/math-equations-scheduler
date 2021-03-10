@@ -3,16 +3,12 @@ package com.va.android.task.implementation.java;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -39,11 +35,13 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.va.android.task.BuildConfig;
 import com.va.android.task.R;
+import com.va.android.task.implementation.java.engine.MathEngine;
+import com.va.android.task.implementation.java.engine.data.model.MathAnswer;
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
 import com.va.android.task.implementation.java.engine.data.model.Operator;
-import com.va.android.task.implementation.java.engine.MathEngineService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
@@ -106,29 +104,10 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.rv_operations_results)
     RecyclerView mOperationsResultsRV;
 
+    private MathEngine mMathEngine;
     private PendingOperationsAdapter mPendingOperationsAdapter;
     private OperationsResultsAdapter mOperationsResultsAdapter;
     private Operator mSelectedOperator = Operator.ADD;
-
-    // Service
-    private MathEngineService mServiceReference;
-    private boolean mIsBound;
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mServiceReference = ((MathEngineService.LocalBinder) service).getService();
-            mServiceReference.addListener(mServiceListener);
-            mPendingOperationsAdapter.replaceData(mServiceReference.getPendingOperations());
-            mOperationsResultsAdapter.replaceData(mServiceReference.getOperationsResults());
-            mIsBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mServiceReference = null;
-            mIsBound = false;
-        }
-    };
 
     // Location
     private FusedLocationProviderClient mFusedLocationClient;
@@ -159,26 +138,8 @@ public class MainActivity extends AppCompatActivity {
         createLocationRequest();
         buildLocationSettingsRequest();
 
-        MathEngineService.start(this);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (!mIsBound) {
-            Intent bindIntent = new Intent(this, MathEngineService.class);
-            mIsBound = bindService(bindIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mIsBound) {
-            mServiceReference.removeListener(mServiceListener);
-            unbindService(mServiceConnection);
-            mIsBound = false;
-        }
+        mMathEngine = new MathEngine(this, getLifecycle(), mMathEngineListener);
+        mMathEngine.start();
     }
 
     @Override
@@ -478,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
 
         MathQuestion mathQuestion =
                 new MathQuestion(firstOperand, secondOperand, mSelectedOperator, delayTime);
-        MathEngineService.calculate(this, mathQuestion);
+        mMathEngine.calculate(mathQuestion);
 
         clearInputs();
     }
@@ -501,19 +462,21 @@ public class MainActivity extends AppCompatActivity {
         mDelayTimeEditText.setText(null);
     }
 
-    private final MathEngineService.Listener mServiceListener = new MathEngineService.Listener() {
+    private final MathEngine.Listener mMathEngineListener = new MathEngine.Listener() {
         @Override
-        public void onResultsChanged() {
-            if (mIsBound) {
-                mOperationsResultsAdapter.replaceData(mServiceReference.getOperationsResults());
-            }
+        public void onConnected(@NonNull List<MathQuestion> pending, @NonNull List<MathAnswer> results) {
+            mPendingOperationsAdapter.replaceData(pending);
+            mOperationsResultsAdapter.replaceData(results);
         }
 
         @Override
-        public void onPendingOperationsChanged() {
-            if (mIsBound) {
-                mPendingOperationsAdapter.replaceData(mServiceReference.getPendingOperations());
-            }
+        public void onPendingOperationsChanged(@NonNull List<MathQuestion> pending) {
+            mPendingOperationsAdapter.replaceData(pending);
+        }
+
+        @Override
+        public void onResultsChanged(@NonNull List<MathAnswer> results) {
+            mOperationsResultsAdapter.replaceData(results);
         }
 
         @Override
