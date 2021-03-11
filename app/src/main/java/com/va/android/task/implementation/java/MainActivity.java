@@ -2,10 +2,7 @@ package com.va.android.task.implementation.java;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -17,7 +14,6 @@ import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
-import com.va.android.task.BuildConfig;
 import com.va.android.task.R;
 import com.va.android.task.implementation.java.engine.MathEngine;
 import com.va.android.task.implementation.java.engine.data.model.MathAnswer;
@@ -38,6 +34,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemSelected;
 
+import static com.va.android.task.implementation.java.util.ViewUtil.getAppSettingsIntent;
+import static com.va.android.task.implementation.java.util.ViewUtil.getOperand;
 import static com.va.android.task.implementation.java.util.ViewUtil.showSnackBar;
 
 @SuppressLint("NonConstantResourceId")
@@ -142,15 +140,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setButtonsEnabled(boolean enabled) {
-        if (enabled) {
-            mCurrentLocationProgress.setVisibility(View.GONE);
-            mCurrentLocationContainer.setEnabled(true);
-            mCurrentLocationContainer.setAlpha(1.0f);
-        } else {
+    private void setLocationLoading(boolean loading) {
+        if (loading) {
             mCurrentLocationProgress.setVisibility(View.VISIBLE);
             mCurrentLocationContainer.setEnabled(false);
             mCurrentLocationContainer.setAlpha(0.5f);
+        } else {
+            mCurrentLocationProgress.setVisibility(View.GONE);
+            mCurrentLocationContainer.setEnabled(true);
+            mCurrentLocationContainer.setAlpha(1.0f);
         }
     }
 
@@ -238,14 +236,6 @@ public class MainActivity extends AppCompatActivity {
         clearInputs();
     }
 
-    private static double getOperand(EditText editText) {
-        String operandText = editText.getText().toString();
-        if (TextUtils.isEmpty(operandText)) {
-            throw new NumberFormatException("operand cannot be empty!");
-        }
-        return Double.parseDouble(operandText);
-    }
-
     private void clearInputs() {
         mFirstOperandEditText.setText(null);
         mSecondOperandEditText.setText(null);
@@ -294,15 +284,7 @@ public class MainActivity extends AppCompatActivity {
                     R.string.permission_denied_explanation,
                     getString(R.string.settings),
                     Snackbar.LENGTH_INDEFINITE,
-                    view -> {
-                        // Build intent that displays the App settings screen.
-                        Intent intent = new Intent();
-                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
-                        intent.setData(uri);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
+                    view -> startActivity(getAppSettingsIntent())
             );
         }
 
@@ -313,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onStartLocationListening() {
-            setButtonsEnabled(false);
+            setLocationLoading(true);
         }
 
         @Override
@@ -326,12 +308,12 @@ public class MainActivity extends AppCompatActivity {
             if (error != null) {
                 Toast.makeText(MainActivity.this, error, Toast.LENGTH_LONG).show();
             }
-            setButtonsEnabled(true);
+            setLocationLoading(false);
         }
 
         @Override
         public void onLocationResult(double latitude, double longitude) {
-            setButtonsEnabled(true);
+            setLocationLoading(false);
             mLatLongContainer.setVisibility(View.VISIBLE);
             mLatTextView.setText(getString(R.string.format_lat, latitude));
             mLongTextView.setText(getString(R.string.format_long, longitude));
