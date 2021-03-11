@@ -1,18 +1,11 @@
 package com.va.android.task.implementation.java;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
-import android.content.IntentSender;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -21,16 +14,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.location.SettingsClient;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.va.android.task.BuildConfig;
@@ -39,14 +22,15 @@ import com.va.android.task.implementation.java.engine.MathEngine;
 import com.va.android.task.implementation.java.engine.data.model.MathAnswer;
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
 import com.va.android.task.implementation.java.engine.data.model.Operator;
+import com.va.android.task.implementation.java.location.LocationManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
@@ -54,16 +38,10 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemSelected;
 
+import static com.va.android.task.implementation.java.util.ViewUtil.showSnackBar;
+
 @SuppressLint("NonConstantResourceId")
 public class MainActivity extends AppCompatActivity {
-    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
-    private static final int REQUEST_CHECK_SETTINGS = 9000;
-
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-
-    private final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
-    private final static String KEY_LOCATION = "location";
 
     @BindView(R.id.root)
     View mRoot;
@@ -104,19 +82,12 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.rv_operations_results)
     RecyclerView mOperationsResultsRV;
 
-    private MathEngine mMathEngine;
     private PendingOperationsAdapter mPendingOperationsAdapter;
     private OperationsResultsAdapter mOperationsResultsAdapter;
     private Operator mSelectedOperator = Operator.ADD;
 
-    // Location
-    private FusedLocationProviderClient mFusedLocationClient;
-    private SettingsClient mSettingsClient;
-    private LocationRequest mLocationRequest;
-    private LocationSettingsRequest mLocationSettingsRequest;
-    private LocationCallback mLocationCallback;
-    private Location mCurrentLocation;
-    private boolean mRequestingLocationUpdates;
+    private MathEngine mMathEngine;
+    private LocationManager mLocationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,212 +101,39 @@ public class MainActivity extends AppCompatActivity {
         setupPendingOperations();
         setupOperationsResults();
 
-        mRequestingLocationUpdates = false;
-        updateValuesFromBundle(savedInstanceState);
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mSettingsClient = LocationServices.getSettingsClient(this);
-        createLocationCallback();
-        createLocationRequest();
-        buildLocationSettingsRequest();
-
+        mLocationManager = new LocationManager(this, savedInstanceState, mLocationListener);
         mMathEngine = new MathEngine(this, getLifecycle(), mMathEngineListener);
         mMathEngine.start();
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (mCurrentLocationCB.isChecked()) {
-            startLocationUpdates();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopLocationUpdates();
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CHECK_SETTINGS) {
-            switch (resultCode) {
-                case Activity.RESULT_OK:
-                    startLocationUpdates();
-                    break;
-                case Activity.RESULT_CANCELED:
-                    mRequestingLocationUpdates = false;
-                    setButtonsEnabled(true);
-                    break;
-            }
-        }
+        mLocationManager.onActivityResult(requestCode, resultCode);
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putBoolean(KEY_REQUESTING_LOCATION_UPDATES, mRequestingLocationUpdates);
-        savedInstanceState.putParcelable(KEY_LOCATION, mCurrentLocation);
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
+        mLocationManager.onSaveInstanceState(savedInstanceState);
         super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startLocationUpdates();
-            } else {
-                // Permission denied.
-                // It is important to remember that a permission might have been
-                // rejected without asking the user for permission (device policy or "Never ask
-                // again" prompts). Therefore, a user interface affordance is typically implemented
-                // when permissions are denied. Otherwise, your app could appear unresponsive to
-                // touches or interactions which have required permissions.
-                showSnackBar(R.string.permission_denied_explanation, R.string.settings, view -> {
-                    // Build intent that displays the App settings screen.
-                    Intent intent = new Intent();
-                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                    Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
-                    intent.setData(uri);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                });
-            }
-        }
-    }
-
-    private boolean isLocationPermissionGranted() {
-        int permissionState = ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-        return permissionState == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestLocationPermission() {
-        boolean shouldProvideRationale =
-                ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION);
-        // Provide an additional rationale to the user. This would happen if the user denied the
-        // request previously, but didn't check the "Don't ask again" checkbox.
-        if (shouldProvideRationale) {
-            showSnackBar(R.string.location_permission_rationale, R.string.ok, view ->
-                    ActivityCompat.requestPermissions(
-                            this,
-                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                            REQUEST_PERMISSIONS_REQUEST_CODE
-                    )
-            );
-        } else {
-            // Request permission. It's possible this can be auto answered if device policy
-            // sets the permission in a given state or the user denied the permission
-            // previously and checked "Never ask again".
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_PERMISSIONS_REQUEST_CODE
-            );
-        }
+        mLocationManager.onRequestPermissionsResult(requestCode, grantResults);
     }
 
     @OnClick(R.id.current_location_container)
     void onCurrentLocationContainerClick() {
         if (mCurrentLocationCB.isChecked()) {
-            stopLocationUpdates();
             mCurrentLocationCB.setChecked(false);
             mLatLongContainer.setVisibility(View.GONE);
-            mCurrentLocation = null;
-        } else {
-            if (!isLocationPermissionGranted()) {
-                requestLocationPermission();
-                return;
-            }
-            if (!mRequestingLocationUpdates) {
-                startLocationUpdates();
-            }
+            mLocationManager.setEnabled(false);
         }
-    }
-
-    private void updateValuesFromBundle(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            if (savedInstanceState.keySet().contains(KEY_REQUESTING_LOCATION_UPDATES)) {
-                mRequestingLocationUpdates = savedInstanceState.getBoolean(KEY_REQUESTING_LOCATION_UPDATES);
-            }
-            if (savedInstanceState.keySet().contains(KEY_LOCATION)) {
-                mCurrentLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            }
+        else {
+            mLocationManager.setEnabled(true);
         }
-    }
-
-    private void createLocationRequest() {
-        mLocationRequest = LocationRequest.create();
-        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
-        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
-
-    private void createLocationCallback() {
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                mCurrentLocation = locationResult.getLastLocation();
-                setButtonsEnabled(true);
-                mLatLongContainer.setVisibility(View.VISIBLE);
-                mLatTextView.setText(getString(R.string.format_lat, mCurrentLocation.getLatitude()));
-                mLongTextView.setText(getString(R.string.format_long, mCurrentLocation.getLongitude()));
-            }
-        };
-    }
-
-    private void buildLocationSettingsRequest() {
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(mLocationRequest);
-        mLocationSettingsRequest = builder.build();
-    }
-
-    // Suppressing the location permission here is safe because this method will never be called
-    // without the permission being granted.
-    @SuppressLint("MissingPermission")
-    private void startLocationUpdates() {
-        mRequestingLocationUpdates = true;
-        setButtonsEnabled(false);
-        // Begin by checking if the device has the necessary location settings.
-        mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
-                .addOnSuccessListener(this, response -> {
-                    mFusedLocationClient.requestLocationUpdates(
-                            mLocationRequest,
-                            mLocationCallback,
-                            Looper.getMainLooper()
-                    );
-                    mCurrentLocationCB.setChecked(true);
-                })
-                .addOnFailureListener(this, e -> {
-                    int statusCode = ((ApiException) e).getStatusCode();
-                    switch (statusCode) {
-                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                            try {
-                                ResolvableApiException rae = (ResolvableApiException) e;
-                                rae.startResolutionForResult(this, REQUEST_CHECK_SETTINGS);
-                            } catch (IntentSender.SendIntentException sie) {
-                                // Ignore the error.
-                            }
-                            break;
-                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                            String errorMessage = "Location settings are inadequate, and cannot be " +
-                                    "fixed here. Fix in Settings.";
-                            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-                            mRequestingLocationUpdates = false;
-                            setButtonsEnabled(true);
-                    }
-                });
-    }
-
-    private void stopLocationUpdates() {
-        if (!mRequestingLocationUpdates) {
-            return;
-        }
-        mFusedLocationClient.removeLocationUpdates(mLocationCallback)
-                .addOnCompleteListener(this, task -> mRequestingLocationUpdates = false);
     }
 
     private void setButtonsEnabled(boolean enabled) {
@@ -348,16 +146,6 @@ public class MainActivity extends AppCompatActivity {
             mCurrentLocationContainer.setEnabled(false);
             mCurrentLocationContainer.setAlpha(0.5f);
         }
-    }
-
-    private void showSnackBar(@StringRes int message, @StringRes int actionLabel,
-                              View.OnClickListener listener) {
-        Snackbar snackbar = Snackbar.make(mRoot, getString(message), Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction(getString(actionLabel), listener);
-        snackbar.show();
-        View view = snackbar.getView();
-        TextView tv = view.findViewById(com.google.android.material.R.id.snackbar_text);
-        if (tv != null) tv.setGravity(Gravity.CENTER_HORIZONTAL);
     }
 
     private void setupOperatorsSpinner() {
@@ -482,6 +270,69 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onNotificationActionCancelAllClick() {
             mPendingOperationsAdapter.clearData();
+        }
+    };
+
+    private final LocationManager.Listener mLocationListener = new LocationManager.Listener() {
+        @Override
+        public void onProvideLocationPermissionRationale() {
+            showSnackBar(
+                    mRoot,
+                    R.string.location_permission_rationale,
+                    getString(R.string.ok),
+                    Snackbar.LENGTH_INDEFINITE,
+                    view -> mLocationManager.requestLocationPermission()
+            );
+        }
+
+        @Override
+        public void onLocationPermissionDenied() {
+            showSnackBar(
+                    mRoot,
+                    R.string.permission_denied_explanation,
+                    getString(R.string.settings),
+                    Snackbar.LENGTH_INDEFINITE,
+                    view -> {
+                        // Build intent that displays the App settings screen.
+                        Intent intent = new Intent();
+                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+                        intent.setData(uri);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    }
+            );
+        }
+
+        @Override
+        public boolean shouldFetchLocationInfo() {
+            return mCurrentLocationCB.isChecked();
+        }
+
+        @Override
+        public void onStartLocationListening() {
+            setButtonsEnabled(false);
+        }
+
+        @Override
+        public void onLocationSettingsSuccess() {
+            mCurrentLocationCB.setChecked(true);
+        }
+
+        @Override
+        public void onLocationSettingsFailure(@Nullable String error) {
+            if (error != null) {
+                Toast.makeText(MainActivity.this, error, Toast.LENGTH_LONG).show();
+            }
+            setButtonsEnabled(true);
+        }
+
+        @Override
+        public void onLocationResult(double latitude, double longitude) {
+            setButtonsEnabled(true);
+            mLatLongContainer.setVisibility(View.VISIBLE);
+            mLatTextView.setText(getString(R.string.format_lat, latitude));
+            mLongTextView.setText(getString(R.string.format_long, longitude));
         }
     };
 }
