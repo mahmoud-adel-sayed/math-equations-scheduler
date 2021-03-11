@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -29,7 +30,6 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -124,6 +124,12 @@ public class MainActivity extends AppCompatActivity {
         mLocationManager.onRequestPermissionsResult(requestCode, grantResults);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+    }
+
     @OnClick(R.id.current_location_container)
     void onCurrentLocationContainerClick() {
         if (mCurrentLocationCB.isChecked()) {
@@ -208,12 +214,12 @@ public class MainActivity extends AppCompatActivity {
             firstOperand = getOperand(mFirstOperandEditText);
             secondOperand = getOperand(mSecondOperandEditText);
         } catch (NumberFormatException e) {
-            showToast(R.string.err_operand);
+            showSnackBar(mRoot, R.string.err_operand, Snackbar.LENGTH_SHORT);
             return;
         }
 
         if (mSelectedOperator == Operator.DIVIDE && secondOperand == 0) {
-            showToast(R.string.err_division_by_zero);
+            showSnackBar(mRoot, R.string.err_division_by_zero, Snackbar.LENGTH_SHORT);
             return;
         }
 
@@ -221,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             delayTime = Long.parseLong(mDelayTimeEditText.getText().toString());
         } catch (NumberFormatException e) {
-            showToast(R.string.err_invalid_delay_time);
+            showSnackBar(mRoot, R.string.err_invalid_delay_time, Snackbar.LENGTH_SHORT);
             return;
         }
 
@@ -238,10 +244,6 @@ public class MainActivity extends AppCompatActivity {
             throw new NumberFormatException("operand cannot be empty!");
         }
         return Double.parseDouble(operandText);
-    }
-
-    private void showToast(@StringRes int stringResId) {
-        Toast.makeText(this, stringResId, Toast.LENGTH_SHORT).show();
     }
 
     private void clearInputs() {

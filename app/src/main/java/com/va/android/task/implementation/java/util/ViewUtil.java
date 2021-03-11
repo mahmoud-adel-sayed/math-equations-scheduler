@@ -14,6 +14,10 @@ import androidx.annotation.StringRes;
 public final class ViewUtil {
     private ViewUtil() { }
 
+    public static void showSnackBar(@NonNull View root, @StringRes int message, @Duration int duration) {
+        showSnackBar(root, message, null, duration, null);
+    }
+
     public static void showSnackBar(@NonNull View root,
                                     @StringRes int message,
                                     @Nullable String actionLabel,

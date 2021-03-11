@@ -9,7 +9,6 @@ import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition
-import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -18,7 +17,6 @@ import com.va.android.task.RecyclerViewItemCountAssertion
 import com.va.android.task.implementation.java.engine.data.model.Operator
 import com.va.android.task.nestedScrollTo
 import com.va.android.task.selectTabAtPosition
-import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -31,6 +29,7 @@ class MainActivityTest {
 
     private var idlingResource: IdlingResource? = null
     private lateinit var mainActivity: MainActivity
+    private val snackBarId = com.google.android.material.R.id.snackbar_text
 
     @Before
     fun setup() {
@@ -59,10 +58,9 @@ class MainActivityTest {
         onView(withId(R.id.et_second_operand)).perform(clearText())
         onView(withId(R.id.btn_calculate)).perform(click())
 
-        // Then a toast message will be shown with an error (Type valid operand)
-        onView(withText(R.string.err_operand))
-                .inRoot(withDecorView(not(mainActivity.window.decorView)))
-                .check(matches(isDisplayed()))
+        // Then a snackBar message will be shown with an error (Type valid operand)
+        onView(withId(snackBarId))
+                .check(matches(withText(R.string.err_operand)))
     }
 
     @Test
@@ -72,10 +70,9 @@ class MainActivityTest {
         onView(withId(R.id.et_second_operand)).perform(typeText("1"), closeSoftKeyboard())
         onView(withId(R.id.btn_calculate)).perform(click())
 
-        // Then a toast message will be shown with an error (Invalid delay time)
-        onView(withText(R.string.err_invalid_delay_time))
-                .inRoot(withDecorView(not(mainActivity.window.decorView)))
-                .check(matches(isDisplayed()))
+        // Then a snackBar message will be shown with an error (Invalid delay time)
+        onView(withId(snackBarId))
+                .check(matches(withText(R.string.err_invalid_delay_time)))
     }
 
     @Test
@@ -88,10 +85,9 @@ class MainActivityTest {
         onView(withId(R.id.et_delay_time)).perform(replaceText("1"))
         onView(withId(R.id.btn_calculate)).perform(click())
 
-        // Then a toast message will be shown with an error (Division by zero is undefined)
-        onView(withText(R.string.err_division_by_zero))
-                .inRoot(withDecorView(not(mainActivity.window.decorView)))
-                .check(matches(isDisplayed()))
+        // Then a snackBar message will be shown with an error (Division by zero is undefined)
+        onView(withId(snackBarId))
+                .check(matches(withText(R.string.err_division_by_zero)))
     }
 
     @Test
