@@ -12,10 +12,16 @@ import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
+/**
+ * The entry point for the background service, call {@link #start()} method to start the service,
+ * if the service is already running calling {@link #start()} will has no effect.
+ * Use {@link #calculate(MathQuestion)} to evaluate simple math equations.
+ */
 public final class MathEngine implements LifecycleObserver {
     private final Context mContext;
     private final Lifecycle mLifecycle;
@@ -25,11 +31,12 @@ public final class MathEngine implements LifecycleObserver {
     private boolean mIsBound;
 
     public interface Listener {
-        void onConnected(@NonNull List<MathQuestion> pending, @NonNull List<MathAnswer> results);
+        default void onConnected(@NonNull List<MathQuestion> pending,
+                                 @NonNull List<MathAnswer> results) { }
 
-        void onPendingOperationsChanged(@NonNull List<MathQuestion> pending);
+        default void onPendingOperationsChanged(@NonNull List<MathQuestion> pending) { }
 
-        void onResultsChanged(@NonNull List<MathAnswer> results);
+        default void onResultsChanged(@NonNull List<MathAnswer> results) { }
 
         default void onNotificationActionCancelAllClick() { }
     }
@@ -53,7 +60,9 @@ public final class MathEngine implements LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     void unbindFromService() {
         if (mIsBound) {
-            mService.removeListener(mServiceListener);
+            if (mService != null) {
+                mService.removeListener(mServiceListener);
+            }
             mContext.unbindService(mServiceConnection);
             mIsBound = false;
         }
@@ -64,10 +73,23 @@ public final class MathEngine implements LifecycleObserver {
         mLifecycle.removeObserver(this);
     }
 
+    @VisibleForTesting
+    boolean isBound() {
+        return mIsBound;
+    }
+
+    /**
+     * Starts the engine and wait for math questions.
+     */
     public void start() {
         MathEngineService.start(mContext);
     }
 
+    /**
+     * Evaluates the math equation and deliver the result after the specified delay time.
+     *
+     * @param mathQuestion The mathQuestion
+     */
     public void calculate(@NonNull MathQuestion mathQuestion) {
         MathEngineService.calculate(mContext, mathQuestion);
     }
@@ -91,12 +113,12 @@ public final class MathEngine implements LifecycleObserver {
     private final MathEngineService.Listener mServiceListener = new MathEngineService.Listener() {
         @Override
         public void onPendingOperationsChanged() {
-            if (mIsBound) mListener.onPendingOperationsChanged(mService.getPendingOperations());
+            mListener.onPendingOperationsChanged(mService.getPendingOperations());
         }
 
         @Override
         public void onResultsChanged() {
-            if (mIsBound) mListener.onResultsChanged(mService.getOperationsResults());
+            mListener.onResultsChanged(mService.getOperationsResults());
         }
 
         @Override

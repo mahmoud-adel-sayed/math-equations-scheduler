@@ -11,8 +11,7 @@ import com.va.android.task.implementation.java.engine.data.model.Operator
 import com.va.android.task.mock
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThat
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -72,7 +71,7 @@ class MathEngineServiceTest {
         val mathQuestion = MathQuestion(1.0, 1.0, Operator.ADD, 5L)
         serviceRule.startService(MathEngineService.createIntent(getApplicationContext(), mathQuestion))
 
-        latch.await(mathQuestion.delayTime + 1, TimeUnit.SECONDS)
+        assertTrue(latch.await(mathQuestion.delayTime + 1, TimeUnit.SECONDS))
         assertThat(service.pendingOperations.size, `is`(equalTo(0)))
         assertThat(service.operationsResults.size, `is`(equalTo(1)))
         assertEquals(service.operationsResults[0].result, mathQuestion.answer())
