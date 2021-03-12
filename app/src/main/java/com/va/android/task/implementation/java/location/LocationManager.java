@@ -33,24 +33,31 @@ import androidx.lifecycle.OnLifecycleEvent;
 /**
  * Fetches location info and notifies the registered listener.
  *
- * <p>
- *     The {@link AppCompatActivity} passed to the constructor must override & delegate its callbacks
- *     to these methods {@link #onSaveInstanceState(Bundle)}, {@link #onActivityResult(int, int)},
- *     {@link #onRequestPermissionsResult(int, int[])}.
+ * <p>The implementation replies on Google location services and handles the follow functionality:
+ * <ul>
+ *     <li>Requesting the location permission if not granted.</li>
+ *     <li>Checking if the device has the necessary location settings.</li>
+ *     <li>Automatically start/stop listening for location updates when activity is resumed/paused.</li>
+ * </ul>
  * </p>
+ *
+ * <p>The {@link AppCompatActivity} passed to the constructor <strong>must override some callbacks</strong>
+ * & delegate them to these methods {@link #onSaveInstanceState(Bundle)},
+ * {@link #onActivityResult(int, int)}, {@link #onRequestPermissionsResult(int, int[])}.</p>
+ *
+ * <p>Do not use {@code Integer.MAX_VALUE} or {@code Integer.MAX_VALUE - 1} as request codes,
+ * they are used internally.</p>
  */
 public final class LocationManager implements LifecycleObserver {
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
-            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
-    private static final int REQUEST_LOCATION_PERMISSION = 34;
-    private static final int REQUEST_CHECK_SETTINGS = 9000;
+    private static final int REQUEST_LOCATION_PERMISSION = Integer.MAX_VALUE;
+    private static final int REQUEST_CHECK_SETTINGS = Integer.MAX_VALUE - 1;
 
     private final static String KEY_REQUESTING_LOCATION_UPDATES = "KEY_REQUESTING_LOCATION_UPDATES";
     private final static String KEY_LOCATION = "KEY_LOCATION";
 
     private final WeakReference<AppCompatActivity> mActivity;
+    private final LocationOptions mOptions;
     private final Listener mListener;
 
     private FusedLocationProviderClient mFusedLocationClient;
@@ -78,10 +85,11 @@ public final class LocationManager implements LifecycleObserver {
     }
 
     public LocationManager(@NonNull AppCompatActivity activity, @Nullable Bundle savedInstanceState,
-                           @NonNull Listener listener) {
+                           @NonNull LocationOptions options, @NonNull Listener listener) {
         mActivity = new WeakReference<>(activity);
         activity.getLifecycle().addObserver(this);
         updateValuesFromBundle(savedInstanceState);
+        mOptions = options;
         mListener = listener;
     }
 
@@ -111,11 +119,22 @@ public final class LocationManager implements LifecycleObserver {
         }
     }
 
+    /**
+     * The activity must delegate the call to this method from the its similar callback.
+     *
+     * @param savedInstanceState The savedInstanceState
+     */
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putBoolean(KEY_REQUESTING_LOCATION_UPDATES, mRequestingLocationUpdates);
         savedInstanceState.putParcelable(KEY_LOCATION, mLocation);
     }
 
+    /**
+     * The activity must delegate the call to this method from the its similar callback.
+     *
+     * @param requestCode The requestCode
+     * @param resultCode The resultCode
+     */
     public void onActivityResult(int requestCode, int resultCode) {
         if (requestCode == REQUEST_CHECK_SETTINGS) {
             switch (resultCode) {
@@ -130,6 +149,13 @@ public final class LocationManager implements LifecycleObserver {
         }
     }
 
+    /**
+     * The activity must override {@link AppCompatActivity#onRequestPermissionsResult(int, String[], int[])}
+     * callback and delegate the call to this method.
+     *
+     * @param requestCode The requestCode
+     * @param grantResults The grantResults
+     */
     public void onRequestPermissionsResult(int requestCode, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -146,6 +172,12 @@ public final class LocationManager implements LifecycleObserver {
         }
     }
 
+    /**
+     * If enabled is {@code true}, it checks permission & location settings then starts listening
+     * for location updates, otherwise it stops listening.
+     *
+     * @param enabled The flag indicating that location fetching should be enabled or not.
+     */
     public void setEnabled(boolean enabled) {
         if (enabled) {
             if (!isLocationPermissionGranted()) {
@@ -161,6 +193,9 @@ public final class LocationManager implements LifecycleObserver {
         }
     }
 
+    /**
+     * Requests the {@code Manifest.permission.ACCESS_FINE_LOCATION} permission.
+     */
     public void requestLocationPermission() {
         ActivityCompat.requestPermissions(
                 mActivity.get(),
@@ -193,9 +228,9 @@ public final class LocationManager implements LifecycleObserver {
 
     private LocationRequest createLocationRequest() {
         LocationRequest lr = LocationRequest.create();
-        lr.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
-        lr.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
-        lr.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        lr.setInterval(mOptions.getInterval());
+        lr.setFastestInterval(mOptions.getFastestInterval());
+        lr.setPriority(mOptions.getPriority());
         return lr;
     }
 
