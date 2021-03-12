@@ -20,6 +20,7 @@ import com.va.android.task.implementation.java.engine.data.model.MathAnswer;
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
 import com.va.android.task.implementation.java.engine.data.model.Operator;
 import com.va.android.task.implementation.java.location.LocationManager;
+import com.va.android.task.implementation.java.location.LocationOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +100,12 @@ public class MainActivity extends AppCompatActivity {
         setupPendingOperations();
         setupOperationsResults();
 
-        mLocationManager = new LocationManager(this, savedInstanceState, mLocationListener);
+        LocationOptions options = new LocationOptions.Builder()
+                .setPriority(LocationOptions.Priority.PRIORITY_HIGH_ACCURACY)
+                .build();
+        mLocationManager =
+                new LocationManager(this, savedInstanceState, options, mLocationListener);
+
         mMathEngine = new MathEngine(this, getLifecycle(), mMathEngineListener);
         mMathEngine.start();
     }
