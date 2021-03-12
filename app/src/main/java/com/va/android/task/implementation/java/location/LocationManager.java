@@ -45,13 +45,13 @@ import androidx.lifecycle.OnLifecycleEvent;
  * & delegate them to these methods {@link #onSaveInstanceState(Bundle)},
  * {@link #onActivityResult(int, int)}, {@link #onRequestPermissionsResult(int, int[])}.</p>
  *
- * <p>Do not use {@code Integer.MAX_VALUE} or {@code Integer.MAX_VALUE - 1} as request codes,
+ * <p><strong>Do not use {@code 2000} or {@code 2001} as request codes</strong>,
  * they are used internally.</p>
  */
 public final class LocationManager implements LifecycleObserver {
 
-    private static final int REQUEST_LOCATION_PERMISSION = Integer.MAX_VALUE;
-    private static final int REQUEST_CHECK_SETTINGS = Integer.MAX_VALUE - 1;
+    private static final int REQUEST_LOCATION_PERMISSION = 2000;
+    private static final int REQUEST_CHECK_SETTINGS = 2001;
 
     private final static String KEY_REQUESTING_LOCATION_UPDATES = "KEY_REQUESTING_LOCATION_UPDATES";
     private final static String KEY_LOCATION = "KEY_LOCATION";
