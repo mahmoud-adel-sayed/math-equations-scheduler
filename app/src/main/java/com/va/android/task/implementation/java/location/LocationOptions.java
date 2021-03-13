@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * This class encapsulates some properties related to the Accuracy & Frequency of the location updates.
@@ -38,18 +39,19 @@ public final class LocationOptions {
     }
 
     /**
-     * Returns the interval at which location is computed for your app.
+     * Returns the interval (in milliseconds) at which location is computed for your app.
      *
-     * @return The interval.
+     * @return The interval (in milliseconds).
      */
     public long getInterval() {
         return interval;
     }
 
     /**
-     * Returns the interval at which location computed for other apps is delivered to your app.
+     * Returns the interval (in milliseconds) at which location computed for
+     * other apps is delivered to your app.
      *
-     * @return The fastest interval.
+     * @return The fastest interval (in milliseconds).
      */
     public long getFastestInterval() {
         return fastestInterval;
@@ -70,18 +72,28 @@ public final class LocationOptions {
      */
     @SuppressWarnings("unused")
     public static class Builder {
+        @VisibleForTesting
+        static final long DEFAULT_INTERVAL = 10000; // 10 seconds
+
+        @VisibleForTesting
+        static final long DEFAULT_FASTEST_INTERVAL = 5000;
+
+        @Priority
+        @VisibleForTesting
+        static final int DEFAULT_PRIORITY = Priority.PRIORITY_HIGH_ACCURACY;
+
         // Optional parameters - initialized to default values
-        private long interval = 10000; // 10 seconds
-        private long fastestInterval = 5000;
-        @Priority private int priority = Priority.PRIORITY_HIGH_ACCURACY;
+        private long interval = DEFAULT_INTERVAL;
+        private long fastestInterval = DEFAULT_FASTEST_INTERVAL;
+        @Priority private int priority = DEFAULT_PRIORITY;
 
         public Builder() {
         }
 
         /**
-         * Specifies the interval at which location is computed for your app.
+         * Specifies the interval (in milliseconds) at which location is computed for your app.
          *
-         * @param interval The interval
+         * @param interval The interval (in milliseconds)
          * @return The builder instance.
          */
         public Builder setInterval(long interval) {
@@ -90,9 +102,10 @@ public final class LocationOptions {
         }
 
         /**
-         * Specifies the interval at which location computed for other apps is delivered to your app.
+         * Specifies the interval (in milliseconds) at which location computed for
+         * other apps is delivered to your app.
          *
-         * @param fastestInterval The fastest interval
+         * @param fastestInterval The fastest interval (in milliseconds)
          * @return The builder instance.
          */
         public Builder setFastestInterval(long fastestInterval) {
