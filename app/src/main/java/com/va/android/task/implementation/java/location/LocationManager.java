@@ -24,6 +24,7 @@ import java.lang.ref.WeakReference;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Lifecycle;
@@ -50,11 +51,17 @@ import androidx.lifecycle.OnLifecycleEvent;
  */
 public final class LocationManager implements LifecycleObserver {
 
-    private static final int REQUEST_LOCATION_PERMISSION = 2000;
-    private static final int REQUEST_CHECK_SETTINGS = 2001;
+    @VisibleForTesting
+    static final int REQUEST_LOCATION_PERMISSION = 2000;
 
-    private final static String KEY_REQUESTING_LOCATION_UPDATES = "KEY_REQUESTING_LOCATION_UPDATES";
-    private final static String KEY_LOCATION = "KEY_LOCATION";
+    @VisibleForTesting
+    static final int REQUEST_CHECK_SETTINGS = 2001;
+
+    @VisibleForTesting
+    final static String KEY_REQUESTING_LOCATION_UPDATES = "KEY_REQUESTING_LOCATION_UPDATES";
+
+    @VisibleForTesting
+    final static String KEY_LOCATION = "KEY_LOCATION";
 
     private final WeakReference<AppCompatActivity> mActivity;
     private final LocationOptions mOptions;
@@ -87,10 +94,10 @@ public final class LocationManager implements LifecycleObserver {
     public LocationManager(@NonNull AppCompatActivity activity, @Nullable Bundle savedInstanceState,
                            @NonNull LocationOptions options, @NonNull Listener listener) {
         mActivity = new WeakReference<>(activity);
-        activity.getLifecycle().addObserver(this);
         updateValuesFromBundle(savedInstanceState);
         mOptions = options;
         mListener = listener;
+        activity.getLifecycle().addObserver(this);
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
@@ -117,6 +124,17 @@ public final class LocationManager implements LifecycleObserver {
         if (mActivity.get() != null) {
             mActivity.get().getLifecycle().removeObserver(this);
         }
+    }
+
+    @VisibleForTesting
+    boolean isRequestingLocationUpdates() {
+        return mRequestingLocationUpdates;
+    }
+
+    @Nullable
+    @VisibleForTesting
+    Location getLocation() {
+        return mLocation;
     }
 
     /**
