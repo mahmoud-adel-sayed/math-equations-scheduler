@@ -65,7 +65,7 @@ public final class LocationManager implements LifecycleObserver {
 
     private final WeakReference<AppCompatActivity> mActivity;
     private final LocationOptions mOptions;
-    private final Listener mListener;
+    private Listener mListener;
 
     private FusedLocationProviderClient mFusedLocationClient;
     private SettingsClient mSettingsClient;
@@ -121,6 +121,7 @@ public final class LocationManager implements LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     void removeObserver() {
+        mListener = NULL;
         if (mActivity.get() != null) {
             mActivity.get().getLifecycle().removeObserver(this);
         }
@@ -324,4 +325,20 @@ public final class LocationManager implements LifecycleObserver {
         mFusedLocationClient.removeLocationUpdates(mLocationCallback)
                 .addOnCompleteListener(mActivity.get(), task -> mRequestingLocationUpdates = false);
     }
+
+    private static final Listener NULL = new Listener() {
+        @Override
+        public void onProvideLocationPermissionRationale() { }
+
+        @Override
+        public void onLocationPermissionDenied() { }
+
+        @Override
+        public boolean shouldFetchLocationInfo() {
+            return false;
+        }
+
+        @Override
+        public void onLocationResult(double latitude, double longitude) { }
+    };
 }
