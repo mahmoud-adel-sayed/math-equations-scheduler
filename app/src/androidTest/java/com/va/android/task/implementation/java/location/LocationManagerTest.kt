@@ -188,7 +188,7 @@ class LocationManagerTest {
         val locationManager = manager!!
         locationManager.setEnabled(true)
 
-        assertTrue(latch.await(interval + 2000, TimeUnit.MILLISECONDS))
+        assertTrue(latch.await(interval + 4000, TimeUnit.MILLISECONDS))
         assertNotNull(locationManager.location)
         assertNotNull(latitude)
         assertNotNull(longitude)

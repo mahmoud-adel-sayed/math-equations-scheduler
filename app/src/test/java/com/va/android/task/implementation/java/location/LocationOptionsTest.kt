@@ -66,7 +66,6 @@ class LocationOptionsTest {
         assertEquals(options.priority, LocationOptions.Builder.DEFAULT_PRIORITY)
         assertEquals(options.interval, LocationOptions.Builder.DEFAULT_INTERVAL)
         assertEquals(options.fastestInterval, FASTEST_INTERVAL)
-
     }
 
     @Test

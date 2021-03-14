@@ -60,6 +60,7 @@ public final class ViewUtil {
      *
      * @return The app settings intent.
      */
+    @NonNull
     public static Intent getAppSettingsIntent() {
         Intent intent = new Intent();
         intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);

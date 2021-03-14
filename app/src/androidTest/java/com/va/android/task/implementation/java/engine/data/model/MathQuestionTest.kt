@@ -11,8 +11,8 @@ import org.junit.runner.RunWith
 /**
  * Tests that the parcelable interface is implemented correctly.
  */
-@RunWith(AndroidJUnit4::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MathQuestionTest {
 
     companion object {

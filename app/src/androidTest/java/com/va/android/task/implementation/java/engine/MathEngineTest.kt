@@ -2,7 +2,7 @@ package com.va.android.task.implementation.java.engine
 
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SmallTest
+import androidx.test.filters.MediumTest
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread
 import com.va.android.task.TestLifecycleOwner
 import com.va.android.task.implementation.java.engine.data.model.MathAnswer
@@ -19,7 +19,7 @@ import org.mockito.Mockito.anyList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@SmallTest
+@MediumTest
 @RunWith(AndroidJUnit4::class)
 class MathEngineTest {
 
