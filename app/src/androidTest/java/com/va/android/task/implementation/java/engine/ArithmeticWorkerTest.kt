@@ -1,6 +1,7 @@
 package com.va.android.task.implementation.java.engine
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.MediumTest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.testing.WorkManagerTestInitHelper
@@ -18,6 +19,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.TimeUnit
 
+@MediumTest
 @RunWith(AndroidJUnit4::class)
 class ArithmeticWorkerTest {
 
