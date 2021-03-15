@@ -44,14 +44,12 @@ class MathEngineService : Service() {
         private const val KEY_RESULT = "KEY_RESULT"
 
         @JvmStatic
-        fun start(c: Context) {
-            ContextCompat.startForegroundService(c, Intent(c, MathEngineService::class.java))
-        }
+        internal fun start(c: Context) =
+                ContextCompat.startForegroundService(c, Intent(c, MathEngineService::class.java))
 
         @JvmStatic
-        fun calculate(c: Context, mathQuestion: MathQuestion) {
-            ContextCompat.startForegroundService(c, createIntent(c, mathQuestion))
-        }
+        internal fun calculate(c: Context, mathQuestion: MathQuestion) =
+                ContextCompat.startForegroundService(c, createIntent(c, mathQuestion))
 
         @VisibleForTesting
         internal fun createIntent(c: Context, mathQuestion: MathQuestion): Intent =
@@ -87,7 +85,7 @@ class MathEngineService : Service() {
 
     private var idlingResource: SimpleCountingIdlingResource? = null
 
-    interface Listener {
+    internal interface Listener {
         fun onResultsChanged()
         fun onPendingOperationsChanged()
         fun onNotificationActionCancelAllClick() { }
@@ -155,25 +153,25 @@ class MathEngineService : Service() {
      * Class used for the client Binder. Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
-    inner class LocalBinder : Binder() {
-        fun getService(): MathEngineService {
+    internal inner class LocalBinder : Binder() {
+        internal fun getService(): MathEngineService {
             // Return this instance of LocalService so clients can call public methods
             return this@MathEngineService
         }
     }
 
-    fun addListener(listener: Listener) {
+    internal fun addListener(listener: Listener) {
         listeners.add(listener)
     }
 
-    fun removeListener(listener: Listener) {
+    internal fun removeListener(listener: Listener) {
         listeners.remove(listener)
     }
 
-    val pendingOperations: List<MathQuestion>
+    internal val pendingOperations: List<MathQuestion>
         get() = ArrayList(pendingTasks)
 
-    val operationsResults: List<MathAnswer>
+    internal val operationsResults: List<MathAnswer>
         get() = ArrayList(results)
 
     private fun handleMathQuestion(mathQuestion: MathQuestion) {
