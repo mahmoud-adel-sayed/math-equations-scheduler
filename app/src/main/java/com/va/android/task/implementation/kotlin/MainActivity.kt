@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         setupOperationsResults()
 
         locationManager = LocationManager(
-                activity = this,
+                appCompatActivity = this,
                 savedInstanceState = savedInstanceState,
                 listener = locationListener
         )

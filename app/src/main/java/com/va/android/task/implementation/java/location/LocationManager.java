@@ -20,8 +20,6 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 
-import java.lang.ref.WeakReference;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -63,7 +61,7 @@ public final class LocationManager implements LifecycleObserver {
     @VisibleForTesting
     final static String KEY_LOCATION = "KEY_LOCATION";
 
-    private final WeakReference<AppCompatActivity> mActivity;
+    private AppCompatActivity mActivity;
     private final LocationOptions mOptions;
     private Listener mListener;
 
@@ -93,7 +91,7 @@ public final class LocationManager implements LifecycleObserver {
 
     public LocationManager(@NonNull AppCompatActivity activity, @Nullable Bundle savedInstanceState,
                            @NonNull LocationOptions options, @NonNull Listener listener) {
-        mActivity = new WeakReference<>(activity);
+        mActivity = activity;
         updateValuesFromBundle(savedInstanceState);
         mOptions = options;
         mListener = listener;
@@ -102,8 +100,8 @@ public final class LocationManager implements LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     void initialize() {
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mActivity.get());
-        mSettingsClient = LocationServices.getSettingsClient(mActivity.get());
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mActivity);
+        mSettingsClient = LocationServices.getSettingsClient(mActivity);
         mLocationCallback = createLocationCallback();
         mLocationRequest = createLocationRequest();
         mLocationSettingsRequest = buildLocationSettingsRequest();
@@ -122,9 +120,8 @@ public final class LocationManager implements LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     void removeObserver() {
         mListener = NULL;
-        if (mActivity.get() != null) {
-            mActivity.get().getLifecycle().removeObserver(this);
-        }
+        mActivity.getLifecycle().removeObserver(this);
+        mActivity = null;
     }
 
     @VisibleForTesting
@@ -217,21 +214,21 @@ public final class LocationManager implements LifecycleObserver {
      */
     public void requestLocationPermission() {
         ActivityCompat.requestPermissions(
-                mActivity.get(),
+                mActivity,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 REQUEST_LOCATION_PERMISSION
         );
     }
 
     private boolean isLocationPermissionGranted() {
-        int permissionState = ActivityCompat.checkSelfPermission(mActivity.get(),
+        int permissionState = ActivityCompat.checkSelfPermission(mActivity,
                 Manifest.permission.ACCESS_FINE_LOCATION);
         return permissionState == PackageManager.PERMISSION_GRANTED;
     }
 
     private void grantLocationPermission() {
         boolean shouldProvideRationale =
-                ActivityCompat.shouldShowRequestPermissionRationale(mActivity.get(),
+                ActivityCompat.shouldShowRequestPermissionRationale(mActivity,
                         Manifest.permission.ACCESS_FINE_LOCATION);
         // Provide an additional rationale to the user. This would happen if the user denied the
         // request previously, but didn't check the "Don't ask again" checkbox.
@@ -291,7 +288,7 @@ public final class LocationManager implements LifecycleObserver {
         mListener.onStartLocationListening();
         // Begin by checking if the device has the necessary location settings.
         mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
-                .addOnSuccessListener(mActivity.get(), response -> {
+                .addOnSuccessListener(mActivity, response -> {
                     mFusedLocationClient.requestLocationUpdates(
                             mLocationRequest,
                             mLocationCallback,
@@ -299,13 +296,13 @@ public final class LocationManager implements LifecycleObserver {
                     );
                     mListener.onLocationSettingsSuccess();
                 })
-                .addOnFailureListener(mActivity.get(), e -> {
+                .addOnFailureListener(mActivity, e -> {
                     int statusCode = ((ApiException) e).getStatusCode();
                     switch (statusCode) {
                         case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                             try {
                                 ResolvableApiException rae = (ResolvableApiException) e;
-                                rae.startResolutionForResult(mActivity.get(), REQUEST_CHECK_SETTINGS);
+                                rae.startResolutionForResult(mActivity, REQUEST_CHECK_SETTINGS);
                             } catch (IntentSender.SendIntentException sie) {
                                 // Ignore the error.
                             }
@@ -323,7 +320,7 @@ public final class LocationManager implements LifecycleObserver {
             return;
         }
         mFusedLocationClient.removeLocationUpdates(mLocationCallback)
-                .addOnCompleteListener(mActivity.get(), task -> mRequestingLocationUpdates = false);
+                .addOnCompleteListener(mActivity, task -> mRequestingLocationUpdates = false);
     }
 
     private static final Listener NULL = new Listener() {

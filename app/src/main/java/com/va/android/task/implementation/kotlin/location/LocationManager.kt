@@ -38,7 +38,7 @@ import com.google.android.gms.location.*
  */
 @Suppress("unused")
 class LocationManager(
-        private val activity: AppCompatActivity,
+        appCompatActivity: AppCompatActivity,
         savedInstanceState: Bundle? = null,
         private val options: LocationOptions = LocationOptions.Builder().build(),
         private var listener: Listener = NULL
@@ -81,9 +81,12 @@ class LocationManager(
     @VisibleForTesting
     internal var requestingLocationUpdates = false
 
+    private var activity: AppCompatActivity?
+
     init {
         updateValuesFromBundle(savedInstanceState)
-        activity.lifecycle.addObserver(this)
+        activity = appCompatActivity
+        appCompatActivity.lifecycle.addObserver(this)
     }
 
     interface Listener {
@@ -104,8 +107,8 @@ class LocationManager(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     internal fun initialize() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
-        settingsClient = LocationServices.getSettingsClient(activity)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
+        settingsClient = LocationServices.getSettingsClient(activity!!)
         locationCallback = createLocationCallback()
         locationRequest = createLocationRequest()
         locationSettingsRequest = buildLocationSettingsRequest()
@@ -122,7 +125,8 @@ class LocationManager(
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     internal fun removeObserver() {
         listener = NULL
-        activity.lifecycle.removeObserver(this)
+        activity?.lifecycle?.removeObserver(this)
+        activity = null
     }
 
     /**
@@ -198,20 +202,20 @@ class LocationManager(
      */
     fun requestLocationPermission() {
         ActivityCompat.requestPermissions(
-                activity,
+                activity!!,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 REQUEST_LOCATION_PERMISSION
         )
     }
 
     private fun isLocationPermissionGranted(): Boolean {
-        val state = ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+        val state = ActivityCompat.checkSelfPermission(activity!!, Manifest.permission.ACCESS_FINE_LOCATION)
         return state == PackageManager.PERMISSION_GRANTED
     }
 
     private fun grantLocationPermission() {
         val shouldProvideRationale =
-                ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                ActivityCompat.shouldShowRequestPermissionRationale(activity!!,
                         Manifest.permission.ACCESS_FINE_LOCATION)
         // Provide an additional rationale to the user. This would happen if the user denied the
         // request previously, but didn't check the "Don't ask again" checkbox.
@@ -265,7 +269,7 @@ class LocationManager(
         requestingLocationUpdates = true
         listener.onStartLocationListening()
         // Begin by checking if the device has the necessary location settings.
-        settingsClient.checkLocationSettings(locationSettingsRequest).addOnSuccessListener(activity) {
+        settingsClient.checkLocationSettings(locationSettingsRequest).addOnSuccessListener(activity!!) {
             fusedLocationClient.requestLocationUpdates(
                     locationRequest,
                     locationCallback,
@@ -273,7 +277,7 @@ class LocationManager(
             )
             listener.onLocationSettingsSuccess()
         }
-        .addOnFailureListener(activity) {
+        .addOnFailureListener(activity!!) {
             when ((it as ApiException).statusCode) {
                 LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> {
                     try {
@@ -296,7 +300,7 @@ class LocationManager(
         if (!requestingLocationUpdates) {
             return
         }
-        fusedLocationClient.removeLocationUpdates(locationCallback).addOnCompleteListener(activity) {
+        fusedLocationClient.removeLocationUpdates(locationCallback).addOnCompleteListener(activity!!) {
             requestingLocationUpdates = false
         }
     }
