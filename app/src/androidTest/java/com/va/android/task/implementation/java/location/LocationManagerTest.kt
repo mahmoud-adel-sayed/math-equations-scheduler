@@ -16,6 +16,7 @@ import com.va.android.task.TestActivity
 import com.va.android.task.implementation.java.location.LocationManager.*
 import com.va.android.task.mock
 import org.hamcrest.Matchers.`is`
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -46,6 +47,11 @@ class LocationManagerTest {
     fun setup() {
         activityScenario = launch(TestActivity::class.java)
         activityScenario.onActivity { testActivity = it }
+    }
+
+    @After
+    fun tearDown() {
+        activityScenario.close()
     }
 
     @Test

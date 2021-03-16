@@ -67,12 +67,13 @@
             android:layout_marginTop="@dimen/margin_m"
             android:layout_marginBottom="@dimen/margin_m"
             android:text="@string/choose_operator"/>
-        <Spinner
+        <androidx.appcompat.widget.AppCompatSpinner
             android:id="@+id/spinner_operators"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_spinner"
-            tools:listitem="@android:layout/simple_list_item_1"/>
+            tools:listitem="@android:layout/simple_list_item_1"
+            android:spinnerMode="dialog"/>
 
         <!-- Delay Time -->
         <TextView

@@ -41,7 +41,7 @@ class LocationManager(
         appCompatActivity: AppCompatActivity,
         savedInstanceState: Bundle? = null,
         private val options: LocationOptions = LocationOptions.Builder().build(),
-        private var listener: Listener = NULL
+        private var listener: Listener? = null
 
 ) : LifecycleObserver {
 
@@ -57,16 +57,6 @@ class LocationManager(
 
         @VisibleForTesting
         internal const val KEY_LOCATION = "KEY_LOCATION"
-
-        private val NULL = object : Listener {
-            override fun onProvideLocationPermissionRationale() { }
-
-            override fun onLocationPermissionDenied() { }
-
-            override fun shouldFetchLocationInfo(): Boolean = false
-
-            override fun onLocationResult(latitude: Double, longitude: Double) { }
-        }
     }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -116,7 +106,7 @@ class LocationManager(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     internal fun startListening() {
-        if (listener.shouldFetchLocationInfo()) startLocationUpdates()
+        if (listener?.shouldFetchLocationInfo() == true) startLocationUpdates()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -124,7 +114,7 @@ class LocationManager(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     internal fun removeObserver() {
-        listener = NULL
+        listener = null
         activity?.lifecycle?.removeObserver(this)
         activity = null
     }
@@ -149,7 +139,7 @@ class LocationManager(
                 Activity.RESULT_OK -> startLocationUpdates()
                 Activity.RESULT_CANCELED -> {
                     requestingLocationUpdates = false
-                    listener.onLocationSettingsFailure(error = null)
+                    listener?.onLocationSettingsFailure(error = null)
                 }
             }
         }
@@ -173,7 +163,7 @@ class LocationManager(
                 // again" prompts). Therefore, a user interface affordance is typically implemented
                 // when permissions are denied. Otherwise, your app could appear unresponsive to
                 // touches or interactions which have required permissions.
-                listener.onLocationPermissionDenied()
+                listener?.onLocationPermissionDenied()
             }
         }
     }
@@ -220,7 +210,7 @@ class LocationManager(
         // Provide an additional rationale to the user. This would happen if the user denied the
         // request previously, but didn't check the "Don't ask again" checkbox.
         if (shouldProvideRationale) {
-            listener.onProvideLocationPermissionRationale()
+            listener?.onProvideLocationPermissionRationale()
         } else {
             // Request permission. It's possible this can be auto answered if device policy
             // sets the permission in a given state or the user denied the permission
@@ -240,7 +230,7 @@ class LocationManager(
             override fun onLocationResult(locationResult: LocationResult?) {
                 super.onLocationResult(locationResult)
                 location = locationResult?.lastLocation
-                listener.onLocationResult(
+                listener?.onLocationResult(
                         latitude = location?.latitude ?: 0.0,
                         longitude = location?.longitude ?: 0.0
                 )
@@ -267,7 +257,7 @@ class LocationManager(
     @SuppressLint("MissingPermission")
     private fun startLocationUpdates() {
         requestingLocationUpdates = true
-        listener.onStartLocationListening()
+        listener?.onStartLocationListening()
         // Begin by checking if the device has the necessary location settings.
         settingsClient.checkLocationSettings(locationSettingsRequest).addOnSuccessListener(activity!!) {
             fusedLocationClient.requestLocationUpdates(
@@ -275,7 +265,7 @@ class LocationManager(
                     locationCallback,
                     Looper.getMainLooper()
             )
-            listener.onLocationSettingsSuccess()
+            listener?.onLocationSettingsSuccess()
         }
         .addOnFailureListener(activity!!) {
             when ((it as ApiException).statusCode) {
@@ -290,7 +280,7 @@ class LocationManager(
                 LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
                     requestingLocationUpdates = false
                     val error = "Location settings are inadequate. Fix in Settings."
-                    listener.onLocationSettingsFailure(error)
+                    listener?.onLocationSettingsFailure(error)
                 }
             }
         }

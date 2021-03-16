@@ -109,7 +109,7 @@ public final class LocationManager implements LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     void startListening() {
-        if (mListener.shouldFetchLocationInfo()) startLocationUpdates();
+        if (mListener != null && mListener.shouldFetchLocationInfo()) startLocationUpdates();
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -119,7 +119,7 @@ public final class LocationManager implements LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     void removeObserver() {
-        mListener = NULL;
+        mListener = null;
         mActivity.getLifecycle().removeObserver(this);
         mActivity = null;
     }
@@ -159,7 +159,9 @@ public final class LocationManager implements LifecycleObserver {
                     break;
                 case Activity.RESULT_CANCELED:
                     mRequestingLocationUpdates = false;
-                    mListener.onLocationSettingsFailure(null);
+                    if (mListener != null) {
+                        mListener.onLocationSettingsFailure(null);
+                    }
                     break;
             }
         }
@@ -183,7 +185,9 @@ public final class LocationManager implements LifecycleObserver {
                 // again" prompts). Therefore, a user interface affordance is typically implemented
                 // when permissions are denied. Otherwise, your app could appear unresponsive to
                 // touches or interactions which have required permissions.
-                mListener.onLocationPermissionDenied();
+                if (mListener != null) {
+                    mListener.onLocationPermissionDenied();
+                }
             }
         }
     }
@@ -233,7 +237,9 @@ public final class LocationManager implements LifecycleObserver {
         // Provide an additional rationale to the user. This would happen if the user denied the
         // request previously, but didn't check the "Don't ask again" checkbox.
         if (shouldProvideRationale) {
-            mListener.onProvideLocationPermissionRationale();
+            if (mListener != null) {
+                mListener.onProvideLocationPermissionRationale();
+            }
         } else {
             // Request permission. It's possible this can be auto answered if device policy
             // sets the permission in a given state or the user denied the permission
@@ -256,7 +262,9 @@ public final class LocationManager implements LifecycleObserver {
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 mLocation = locationResult.getLastLocation();
-                mListener.onLocationResult(mLocation.getLatitude(), mLocation.getLongitude());
+                if (mListener != null) {
+                    mListener.onLocationResult(mLocation.getLatitude(), mLocation.getLongitude());
+                }
             }
         };
     }
@@ -285,7 +293,9 @@ public final class LocationManager implements LifecycleObserver {
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
         mRequestingLocationUpdates = true;
-        mListener.onStartLocationListening();
+        if (mListener != null) {
+            mListener.onStartLocationListening();
+        }
         // Begin by checking if the device has the necessary location settings.
         mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
                 .addOnSuccessListener(mActivity, response -> {
@@ -294,7 +304,9 @@ public final class LocationManager implements LifecycleObserver {
                             mLocationCallback,
                             Looper.getMainLooper()
                     );
-                    mListener.onLocationSettingsSuccess();
+                    if (mListener != null) {
+                        mListener.onLocationSettingsSuccess();
+                    }
                 })
                 .addOnFailureListener(mActivity, e -> {
                     int statusCode = ((ApiException) e).getStatusCode();
@@ -310,7 +322,9 @@ public final class LocationManager implements LifecycleObserver {
                         case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                             mRequestingLocationUpdates = false;
                             String error = "Location settings are inadequate. Fix in Settings.";
-                            mListener.onLocationSettingsFailure(error);
+                            if (mListener != null) {
+                                mListener.onLocationSettingsFailure(error);
+                            }
                     }
                 });
     }
@@ -322,20 +336,4 @@ public final class LocationManager implements LifecycleObserver {
         mFusedLocationClient.removeLocationUpdates(mLocationCallback)
                 .addOnCompleteListener(mActivity, task -> mRequestingLocationUpdates = false);
     }
-
-    private static final Listener NULL = new Listener() {
-        @Override
-        public void onProvideLocationPermissionRationale() { }
-
-        @Override
-        public void onLocationPermissionDenied() { }
-
-        @Override
-        public boolean shouldFetchLocationInfo() {
-            return false;
-        }
-
-        @Override
-        public void onLocationResult(double latitude, double longitude) { }
-    };
 }
