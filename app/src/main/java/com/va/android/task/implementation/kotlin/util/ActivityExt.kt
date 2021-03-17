@@ -14,9 +14,9 @@ fun Context.showToast(message: String, duration: Int) {
  * content of the editText is empty or not a double value.
  */
 fun EditText.toDouble(): Double {
-    val operandText = text.toString()
-    if (TextUtils.isEmpty(operandText)) {
+    val content = text.toString()
+    if (TextUtils.isEmpty(content)) {
         throw NumberFormatException("Cannot be empty!")
     }
-    return operandText.toDouble()
+    return content.toDouble()
 }

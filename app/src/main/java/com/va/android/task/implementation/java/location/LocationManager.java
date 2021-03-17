@@ -32,7 +32,7 @@ import androidx.lifecycle.OnLifecycleEvent;
 /**
  * Fetches location info and notifies the registered listener.
  *
- * <p>The implementation replies on Google location services and handles the follow functionality:
+ * <p>The implementation replies on Google location services and handles the following functionality:
  * <ul>
  *     <li>Requesting the location permission if not granted.</li>
  *     <li>Checking if the device has the necessary location settings.</li>
