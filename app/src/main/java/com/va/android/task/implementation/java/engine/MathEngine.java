@@ -18,6 +18,8 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
+import static com.va.android.task.implementation.java.util.Preconditions.checkNotNull;
+
 /**
  * The entry point for the background service, call {@link #start()} method to start the service,
  * if the service is already running calling {@link #start()} will has no effect.
@@ -44,9 +46,9 @@ public final class MathEngine implements LifecycleObserver {
 
     public MathEngine(@NonNull Context context, @NonNull Lifecycle lifecycle,
                       @NonNull Listener listener) {
-        mContext = context;
-        mLifecycle = lifecycle;
-        mListener = listener;
+        mContext = checkNotNull(context);
+        mLifecycle = checkNotNull(lifecycle);
+        mListener = checkNotNull(listener);
         lifecycle.addObserver(this);
     }
 
@@ -92,7 +94,7 @@ public final class MathEngine implements LifecycleObserver {
      * @param mathQuestion The mathQuestion
      */
     public void calculate(@NonNull MathQuestion mathQuestion) {
-        MathEngineService.calculate(mContext, mathQuestion);
+        MathEngineService.calculate(mContext, checkNotNull(mathQuestion));
     }
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {

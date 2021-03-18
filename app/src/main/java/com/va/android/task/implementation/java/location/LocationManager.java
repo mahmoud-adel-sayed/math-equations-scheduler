@@ -29,6 +29,8 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
+import static com.va.android.task.implementation.java.util.Preconditions.checkNotNull;
+
 /**
  * Fetches location info and notifies the registered listener.
  *
@@ -90,10 +92,10 @@ public final class LocationManager implements LifecycleObserver {
     }
 
     public LocationManager(@NonNull AppCompatActivity activity, @Nullable Bundle savedInstanceState,
-                           @NonNull LocationOptions options, @NonNull Listener listener) {
-        mActivity = activity;
+                           @NonNull LocationOptions options, @Nullable Listener listener) {
+        mActivity = checkNotNull(activity);
         updateValuesFromBundle(savedInstanceState);
-        mOptions = options;
+        mOptions = checkNotNull(options);
         mListener = listener;
         activity.getLifecycle().addObserver(this);
     }
