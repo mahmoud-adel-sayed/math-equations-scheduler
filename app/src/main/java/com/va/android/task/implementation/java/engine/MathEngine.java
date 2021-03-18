@@ -8,6 +8,7 @@ import android.os.IBinder;
 
 import com.va.android.task.implementation.java.engine.data.model.MathAnswer;
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
+import com.va.android.task.implementation.java.engine.data.model.Operation;
 
 import java.util.List;
 
@@ -31,10 +32,10 @@ public final class MathEngine implements LifecycleObserver {
     private boolean mIsBound;
 
     public interface Listener {
-        default void onConnected(@NonNull List<MathQuestion> pending,
+        default void onConnected(@NonNull List<Operation> pending,
                                  @NonNull List<MathAnswer> results) { }
 
-        default void onPendingOperationsChanged(@NonNull List<MathQuestion> pending) { }
+        default void onPendingOperationsChanged(@NonNull List<Operation> pending) { }
 
         default void onResultsChanged(@NonNull List<MathAnswer> results) { }
 

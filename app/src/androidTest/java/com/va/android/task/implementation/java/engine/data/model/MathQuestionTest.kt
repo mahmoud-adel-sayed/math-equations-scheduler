@@ -39,7 +39,6 @@ class MathQuestionTest {
         // Read
         val mathQuestionFromParcel = MathQuestion.CREATOR.createFromParcel(parcel)
         // Verify
-        assertThat(mathQuestionFromParcel.operationId).isEqualTo(mathQuestion.operationId)
         assertThat(mathQuestionFromParcel.firstOperand).isEqualTo(FIRST_OPERAND)
         assertThat(mathQuestionFromParcel.secondOperand).isEqualTo(SECOND_OPERAND)
         assertThat(mathQuestionFromParcel.operator).isEqualTo(OPERATOR)

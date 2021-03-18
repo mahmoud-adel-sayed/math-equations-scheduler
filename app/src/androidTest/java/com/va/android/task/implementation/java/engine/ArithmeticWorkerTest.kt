@@ -17,6 +17,7 @@ import org.junit.Assert.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 @MediumTest
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit
 class ArithmeticWorkerTest {
 
     companion object {
+        private val OPERATION_ID = UUID.randomUUID().toString()
         private val MATH_QUESTION =
                 MathQuestion(1.0, 1.0, Operator.ADD, 5L)
     }
@@ -45,7 +47,7 @@ class ArithmeticWorkerTest {
     @Test
     @Throws(Exception::class)
     fun validInputData_workerSucceeds() {
-        val inputData = getWorkInputData(MATH_QUESTION)
+        val inputData = getWorkInputData(OPERATION_ID, MATH_QUESTION)
         val request = OneTimeWorkRequestBuilder<ArithmeticWorker>()
                 .setInputData(inputData)
                 .build()
@@ -61,7 +63,7 @@ class ArithmeticWorkerTest {
     @Test
     @Throws(Exception::class)
     fun validInputData_withInitialDelay_workerSucceeds() {
-        val inputData = getWorkInputData(MATH_QUESTION)
+        val inputData = getWorkInputData(OPERATION_ID, MATH_QUESTION)
         val request = OneTimeWorkRequestBuilder<ArithmeticWorker>()
                 .setInitialDelay(MATH_QUESTION.delayTime, TimeUnit.SECONDS)
                 .setInputData(inputData)

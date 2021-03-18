@@ -7,6 +7,7 @@ import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiT
 import com.va.android.task.TestLifecycleOwner
 import com.va.android.task.implementation.java.engine.data.model.MathAnswer
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion
+import com.va.android.task.implementation.java.engine.data.model.Operation
 import com.va.android.task.implementation.java.engine.data.model.Operator
 import com.va.android.task.mock
 import org.junit.Assert.assertFalse
@@ -63,11 +64,11 @@ class MathEngineTest {
         val bindingLatch = CountDownLatch(1)
         val interactionLatch = CountDownLatch(3)
         val listener = object : MathEngine.Listener {
-            override fun onConnected(p: MutableList<MathQuestion>, r: MutableList<MathAnswer>) {
+            override fun onConnected(p: MutableList<Operation>, r: MutableList<MathAnswer>) {
                 bindingLatch.countDown()
             }
 
-            override fun onPendingOperationsChanged(pending: MutableList<MathQuestion>) {
+            override fun onPendingOperationsChanged(pending: MutableList<Operation>) {
                 // Called twice
                 interactionLatch.countDown()
             }

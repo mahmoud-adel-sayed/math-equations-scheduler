@@ -1,6 +1,7 @@
 package com.va.android.task.implementation.java;
 
 import android.annotation.SuppressLint;
+import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,21 +9,33 @@ import android.widget.TextView;
 
 import com.va.android.task.R;
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
+import com.va.android.task.implementation.java.engine.data.model.Operation;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class PendingOperationsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<MathQuestion> mMathQuestions;
+public class PendingOperationsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+        implements LifecycleObserver {
 
-    public PendingOperationsAdapter(@NonNull List<MathQuestion> mathQuestions) {
+    private final Map<String, CountDownTimer> mTimers;
+    private List<Operation> mOperations;
+
+    public PendingOperationsAdapter(Lifecycle lifecycle, @NonNull List<Operation> operations) {
         super();
-        mMathQuestions = mathQuestions;
+        mTimers = new HashMap<>();
+        mOperations = operations;
+        lifecycle.addObserver(this);
     }
 
     @NonNull
@@ -35,30 +48,96 @@ public class PendingOperationsAdapter extends RecyclerView.Adapter<RecyclerView.
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
-        MathQuestion item = mMathQuestions.get(position);
-        ((ItemViewHolder)holder).equation.setText(String.format(Locale.US, "Equation: %.2f %s %.2f",
-                item.getFirstOperand(), item.getOperator().symbol(), item.getSecondOperand()));
+        ItemViewHolder itemViewHolder = ((ItemViewHolder)holder);
+        Operation operation = mOperations.get(position);
+
+        if (itemViewHolder.timer != null) {
+            itemViewHolder.timer.cancel();
+            itemViewHolder.timer = null;
+            mTimers.remove(operation.getId());
+        }
+
+        MathQuestion question = operation.getMathQuestion();
+        itemViewHolder.equation.setText(String.format(Locale.US, "Equation: %.2f %s %.2f",
+                question.getFirstOperand(), question.getOperator().symbol(), question.getSecondOperand())
+        );
+
+        setupTimer(itemViewHolder, operation);
     }
 
     @Override
     public int getItemCount() {
-        return mMathQuestions.size();
+        return mOperations.size();
     }
 
-    public void replaceData(@NonNull List<MathQuestion> mathQuestions) {
-        mMathQuestions = mathQuestions;
+    public void replaceData(@NonNull List<Operation> operations) {
+        mOperations = operations;
+        cancelTimers();
+        mTimers.clear();
         notifyDataSetChanged();
     }
 
     public void clearData() {
-        mMathQuestions.clear();
+        mOperations.clear();
+        cancelTimers();
+        mTimers.clear();
         notifyDataSetChanged();
     }
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    void cancelTimers() {
+        for (CountDownTimer timer : mTimers.values())
+            timer.cancel();
+    }
+
+    private void setupTimer(ItemViewHolder holder, Operation operation) {
+        long totalMillis = operation.getEndTime() - System.currentTimeMillis();
+        if (totalMillis <= 0) {
+            holder.remainingTime.setText(null);
+            return;
+        }
+        holder.timer = new CountDownTimer(totalMillis, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long hours = TimeUnit.MILLISECONDS.toHours(millisUntilFinished);
+                millisUntilFinished -= TimeUnit.HOURS.toMillis(hours);
+
+                long minutes = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished);
+                millisUntilFinished -= TimeUnit.MINUTES.toMillis(minutes);
+
+                long seconds = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished);
+
+                holder.remainingTime.setText(getTimeFormatted(hours, minutes, seconds));
+            }
+
+            @Override
+            public void onFinish() {
+                holder.remainingTime.setText(null);
+            }
+        }.start();
+        mTimers.put(operation.getId(), holder.timer);
+    }
+
+    @NonNull
+    private static String getTimeFormatted(long hours, long minutes, long seconds) {
+        return "Remaining Time: " + getDigits(hours) + ":" + getDigits(minutes) + ":" + getDigits(seconds);
+    }
+
+    @NonNull
+    private static String getDigits(long number) {
+        return (number < 10) ? "0" + number : String.valueOf(number);
+    }
+
+    @SuppressLint("NonConstantResourceId")
     static final class ItemViewHolder extends RecyclerView.ViewHolder {
-        @SuppressLint("NonConstantResourceId")
+
         @BindView(R.id.equation)
         TextView equation;
+
+        @BindView(R.id.remaining_time)
+        TextView remainingTime;
+
+        CountDownTimer timer;
 
         ItemViewHolder(View v) {
             super(v);

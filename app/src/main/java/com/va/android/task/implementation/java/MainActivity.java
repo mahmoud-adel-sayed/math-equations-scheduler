@@ -18,6 +18,7 @@ import com.va.android.task.R;
 import com.va.android.task.implementation.java.engine.MathEngine;
 import com.va.android.task.implementation.java.engine.data.model.MathAnswer;
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
+import com.va.android.task.implementation.java.engine.data.model.Operation;
 import com.va.android.task.implementation.java.engine.data.model.Operator;
 import com.va.android.task.implementation.java.location.LocationManager;
 import com.va.android.task.implementation.java.location.LocationOptions;
@@ -192,7 +193,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupPendingOperations() {
-        mPendingOperationsAdapter = new PendingOperationsAdapter(new ArrayList<>(0));
+        mPendingOperationsAdapter =
+                new PendingOperationsAdapter(getLifecycle(), new ArrayList<>(0));
         mPendingOperationsRV.setLayoutManager(
                 new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         mPendingOperationsRV.setAdapter(mPendingOperationsAdapter);
@@ -250,13 +252,13 @@ public class MainActivity extends AppCompatActivity {
 
     private final MathEngine.Listener mMathEngineListener = new MathEngine.Listener() {
         @Override
-        public void onConnected(@NonNull List<MathQuestion> pending, @NonNull List<MathAnswer> results) {
+        public void onConnected(@NonNull List<Operation> pending, @NonNull List<MathAnswer> results) {
             mPendingOperationsAdapter.replaceData(pending);
             mOperationsResultsAdapter.replaceData(results);
         }
 
         @Override
-        public void onPendingOperationsChanged(@NonNull List<MathQuestion> pending) {
+        public void onPendingOperationsChanged(@NonNull List<Operation> pending) {
             mPendingOperationsAdapter.replaceData(pending);
         }
 

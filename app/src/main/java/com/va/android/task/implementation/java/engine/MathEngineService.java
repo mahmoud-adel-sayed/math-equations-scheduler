@@ -16,6 +16,7 @@ import com.va.android.task.R;
 import com.va.android.task.implementation.java.App;
 import com.va.android.task.implementation.java.engine.data.model.MathAnswer;
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion;
+import com.va.android.task.implementation.java.engine.data.model.Operation;
 import com.va.android.task.implementation.java.util.SimpleCountingIdlingResource;
 
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class MathEngineService extends Service {
 
     private WorkManager mWorkManager;
     private Handler mMainThreadHandler;
-    private List<MathQuestion> mPendingTasks;
+    private List<Operation> mPendingOperations;
     private List<MathAnswer> mResults;
 
     private NotificationActionsReceiver mNotificationActionsReceiver;
@@ -73,7 +74,7 @@ public class MathEngineService extends Service {
 
         mWorkManager = WorkManager.getInstance(getApplicationContext());
         mMainThreadHandler = new Handler(Looper.getMainLooper());
-        mPendingTasks = new ArrayList<>();
+        mPendingOperations = new ArrayList<>();
         mResults = new ArrayList<>();
         mIdlingResource = ((App)getApplication()).getIdlingResource();
 
@@ -176,8 +177,8 @@ public class MathEngineService extends Service {
     }
 
     @NonNull
-    List<MathQuestion> getPendingOperations() {
-        return new ArrayList<>(mPendingTasks);
+    List<Operation> getPendingOperations() {
+        return new ArrayList<>(mPendingOperations);
     }
 
     @NonNull
@@ -186,8 +187,8 @@ public class MathEngineService extends Service {
     }
 
     @VisibleForTesting
-    List<MathQuestion> getPending() {
-        return mPendingTasks;
+    List<Operation> getPending() {
+        return mPendingOperations;
     }
 
     @VisibleForTesting
@@ -196,7 +197,11 @@ public class MathEngineService extends Service {
     }
 
     private void handleMathQuestion(@NonNull MathQuestion mathQuestion) {
-        mPendingTasks.add(mathQuestion);
+        long startTime = System.currentTimeMillis();
+        long endTime = startTime + (mathQuestion.getDelayTime() * 1000);
+        Operation operation = new Operation(startTime, endTime, mathQuestion);
+
+        mPendingOperations.add(operation);
         updateNotificationContent();
         startForeground(NOTIFICATION_ID, mNotificationBuilder.build());
         for (Listener listener : mListeners) {
@@ -207,7 +212,7 @@ public class MathEngineService extends Service {
         }
         // Enqueue work
         WorkRequest workRequest = new OneTimeWorkRequest.Builder(ArithmeticWorker.class)
-                .setInputData(ArithmeticWorker.getWorkInputData(mathQuestion))
+                .setInputData(ArithmeticWorker.getWorkInputData(operation.getId(), mathQuestion))
                 .setInitialDelay(mathQuestion.getDelayTime(), TimeUnit.SECONDS)
                 .addTag(ARITHMETIC_WORK_TAG)
                 .build();
@@ -215,26 +220,26 @@ public class MathEngineService extends Service {
     }
 
     private void handleResult(String operationId, String result) {
-        MathQuestion mathQuestion = findMathQuestion(operationId);
-        if (mathQuestion != null) {
+        Operation operation = findOperation(operationId);
+        if (operation != null) {
             mResults.add(new MathAnswer(result));
-            mPendingTasks.remove(mathQuestion);
+            mPendingOperations.remove(operation);
             notifyAndUpdateNotification();
         }
     }
 
     @Nullable
-    private MathQuestion findMathQuestion(String operationId) {
-        for (MathQuestion mathQuestion : mPendingTasks) {
-            if (mathQuestion.getOperationId().equals(operationId))
-                return mathQuestion;
+    private Operation findOperation(String operationId) {
+        for (Operation operation : mPendingOperations) {
+            if (operation.getId().equals(operationId))
+                return operation;
         }
         return null;
     }
 
     private void updateNotificationContent() {
         String content = getString(
-                R.string.format_pending_finished_operations, mPendingTasks.size(), mResults.size()
+                R.string.format_pending_finished_operations, mPendingOperations.size(), mResults.size()
         );
         mNotificationBuilder
                 .setContentText(content)
@@ -273,7 +278,7 @@ public class MathEngineService extends Service {
                 }
                 stopForeground(true);
                 mWorkManager.cancelAllWorkByTag(ARITHMETIC_WORK_TAG);
-                mPendingTasks.clear();
+                mPendingOperations.clear();
                 stopSelf();
             }
         }

@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="@dimen/margin_m"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:alpha="0.5"
-    tools:ignore="UseCompoundDrawables">
+    android:alpha="0.5">
 
     <ImageView
+        android:id="@+id/bullet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="@dimen/margin_m"
         android:background="@drawable/shape_black_circle"
         android:contentDescription="@string/a11y_bullet"/>
@@ -21,5 +20,16 @@
         android:id="@+id/equation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/bullet"
         tools:text="Equation: 50 + 100"/>
-</LinearLayout>
+
+    <TextView
+        android:id="@+id/remaining_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/bullet"
+        android:layout_below="@id/equation"
+        android:textColor="@color/teal_700"
+        android:textStyle="bold"
+        tools:text="Remaining Time: 00:00:30"/>
+</RelativeLayout>
