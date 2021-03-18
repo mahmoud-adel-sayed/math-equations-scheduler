@@ -19,6 +19,7 @@ import com.va.android.task.R
 import com.va.android.task.implementation.kotlin.engine.MathEngine
 import com.va.android.task.implementation.kotlin.engine.data.MathAnswer
 import com.va.android.task.implementation.kotlin.engine.data.MathQuestion
+import com.va.android.task.implementation.kotlin.engine.data.Operation
 import com.va.android.task.implementation.kotlin.engine.data.Operator
 import com.va.android.task.implementation.kotlin.location.LocationManager
 import com.va.android.task.implementation.kotlin.util.getAppSettingsIntent
@@ -181,7 +182,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupPendingOperations() {
-        pendingOperationsAdapter = PendingOperationsAdapter()
+        pendingOperationsAdapter = PendingOperationsAdapter(lifecycle)
         with(pendingOperationsRV) {
             layoutManager = LinearLayoutManager(this@MainActivity, RecyclerView.VERTICAL, false)
             adapter = pendingOperationsAdapter
@@ -244,12 +245,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val mathEngineListener: MathEngine.Listener = object : MathEngine.Listener {
-        override fun onConnected(pending: List<MathQuestion>, results: List<MathAnswer>) {
+        override fun onConnected(pending: List<Operation>, results: List<MathAnswer>) {
             pendingOperationsAdapter.replaceData(pending)
             operationsResultsAdapter.replaceData(results)
         }
 
-        override fun onPendingOperationsChanged(pending: List<MathQuestion>) {
+        override fun onPendingOperationsChanged(pending: List<Operation>) {
             pendingOperationsAdapter.replaceData(pending)
         }
 

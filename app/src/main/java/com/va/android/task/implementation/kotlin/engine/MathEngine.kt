@@ -11,6 +11,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.va.android.task.implementation.kotlin.engine.data.MathAnswer
 import com.va.android.task.implementation.kotlin.engine.data.MathQuestion
+import com.va.android.task.implementation.kotlin.engine.data.Operation
 
 /**
  * The entry point for the background service, call [start] method to start the service,
@@ -32,9 +33,9 @@ class MathEngine(
     }
 
     interface Listener {
-        fun onConnected(pending: List<MathQuestion>, results: List<MathAnswer>) { }
+        fun onConnected(pending: List<Operation>, results: List<MathAnswer>) { }
 
-        fun onPendingOperationsChanged(pending: List<MathQuestion>) { }
+        fun onPendingOperationsChanged(pending: List<Operation>) { }
 
         fun onResultsChanged(results: List<MathAnswer>) { }
 

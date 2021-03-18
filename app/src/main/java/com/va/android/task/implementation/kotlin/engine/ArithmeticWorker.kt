@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.work.Data
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.va.android.task.implementation.kotlin.engine.data.MathQuestion
+import com.va.android.task.implementation.kotlin.engine.data.Operation
 import com.va.android.task.implementation.kotlin.engine.data.Operator
 import java.util.*
 
@@ -18,11 +18,11 @@ class ArithmeticWorker(context: Context, params: WorkerParameters) : Worker(cont
 
         internal const val KEY_RESULT = "key_result"
 
-        internal fun MathQuestion.getWorkInputData(): Data = Data.Builder()
-                .putString(KEY_OPERATION_ID, operationId)
-                .putDouble(KEY_FIRST_OPERAND, firstOperand)
-                .putDouble(KEY_SECOND_OPERAND, secondOperand)
-                .putInt(KEY_OPERATOR_ORDINAL, operator.ordinal)
+        internal fun Operation.getWorkInputData(): Data = Data.Builder()
+                .putString(KEY_OPERATION_ID, id)
+                .putDouble(KEY_FIRST_OPERAND, mathQuestion.firstOperand)
+                .putDouble(KEY_SECOND_OPERAND, mathQuestion.secondOperand)
+                .putInt(KEY_OPERATOR_ORDINAL, mathQuestion.operator.ordinal)
                 .build()
     }
 

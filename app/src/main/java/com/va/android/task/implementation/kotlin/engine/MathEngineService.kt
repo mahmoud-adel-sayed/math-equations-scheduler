@@ -22,6 +22,7 @@ import com.va.android.task.implementation.kotlin.MainActivity
 import com.va.android.task.implementation.kotlin.engine.ArithmeticWorker.Companion.getWorkInputData
 import com.va.android.task.implementation.kotlin.engine.data.MathAnswer
 import com.va.android.task.implementation.kotlin.engine.data.MathQuestion
+import com.va.android.task.implementation.kotlin.engine.data.Operation
 import com.va.android.task.implementation.kotlin.util.SimpleCountingIdlingResource
 import java.util.concurrent.TimeUnit
 
@@ -75,7 +76,7 @@ class MathEngineService : Service() {
     private lateinit var mainThreadHandler: Handler
 
     @VisibleForTesting
-    internal lateinit var pendingTasks: MutableList<MathQuestion>
+    internal lateinit var pending: MutableList<Operation>
 
     @VisibleForTesting
     internal lateinit var results: MutableList<MathAnswer>
@@ -96,7 +97,7 @@ class MathEngineService : Service() {
 
         workManager = WorkManager.getInstance(applicationContext)
         mainThreadHandler = Handler(Looper.getMainLooper())
-        pendingTasks = ArrayList()
+        pending = ArrayList()
         results = ArrayList()
         idlingResource = (application as App).getIdlingResource()
 
@@ -168,14 +169,20 @@ class MathEngineService : Service() {
         listeners.remove(listener)
     }
 
-    internal val pendingOperations: List<MathQuestion>
-        get() = ArrayList(pendingTasks)
+    internal val pendingOperations: List<Operation> get() = ArrayList(pending)
 
-    internal val operationsResults: List<MathAnswer>
-        get() = ArrayList(results)
+    internal val operationsResults: List<MathAnswer> get() = ArrayList(results)
 
     private fun handleMathQuestion(mathQuestion: MathQuestion) {
-        pendingTasks.add(mathQuestion)
+        val startTime = System.currentTimeMillis()
+        val endTime = startTime + (mathQuestion.delayTime * 1000)
+        val operation = Operation(
+                startTime = startTime,
+                endTime = endTime,
+                mathQuestion = mathQuestion
+        )
+
+        pending.add(operation)
         updateNotificationContent()
         startForeground(NOTIFICATION_ID, notificationBuilder.build())
         for (listener in listeners) {
@@ -184,7 +191,7 @@ class MathEngineService : Service() {
         idlingResource?.increment()
         // Enqueue work
         val workRequest = OneTimeWorkRequest.Builder(ArithmeticWorker::class.java)
-                .setInputData(mathQuestion.getWorkInputData())
+                .setInputData(operation.getWorkInputData())
                 .setInitialDelay(mathQuestion.delayTime, TimeUnit.SECONDS)
                 .addTag(ARITHMETIC_WORK_TAG)
                 .build()
@@ -192,17 +199,17 @@ class MathEngineService : Service() {
     }
 
     private fun handleResult(operationId: String, result: String) {
-        val mathQuestion = pendingTasks.find { it.operationId == operationId }
-        if (mathQuestion != null) {
+        val operation = pending.find { it.id == operationId }
+        if (operation != null) {
             results.add(MathAnswer(result))
-            pendingTasks.remove(mathQuestion)
+            pending.remove(operation)
             notifyAndUpdateNotification()
         }
     }
 
     private fun updateNotificationContent() {
         val content = getString(
-                R.string.format_pending_finished_operations, pendingTasks.size, results.size
+                R.string.format_pending_finished_operations, pending.size, results.size
         )
         notificationBuilder
                 .setContentText(content)
@@ -237,7 +244,7 @@ class MathEngineService : Service() {
                 }
                 stopForeground(true)
                 workManager.cancelAllWorkByTag(ARITHMETIC_WORK_TAG)
-                pendingTasks.clear()
+                pending.clear()
                 stopSelf()
             }
         }

@@ -4,11 +4,26 @@ import android.os.Parcel
 import android.os.Parcelable
 import java.util.*
 
+data class Operation(
+        val id: String = UUID.randomUUID().toString(),
+        val startTime: Long,
+        val endTime: Long,
+        val mathQuestion: MathQuestion
+) {
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other !is Operation) return false
+
+        return other.id == id
+    }
+
+    override fun hashCode() = 31 * id.hashCode()
+}
+
 /**
  * An Immutable model that represents a basic mathematical question.
  */
 data class MathQuestion(
-        val operationId: String = UUID.randomUUID().toString(),
         val firstOperand: Double,
         val secondOperand: Double,
         val operator: Operator,
@@ -16,24 +31,13 @@ data class MathQuestion(
 ) : Parcelable {
 
     private constructor(parcel: Parcel) : this(
-            operationId = parcel.readString() ?: "",
             firstOperand = parcel.readDouble(),
             secondOperand = parcel.readDouble(),
             operator = Operator.values()[parcel.readInt()],
             delayTime = parcel.readLong()
     )
 
-    override fun equals(other: Any?): Boolean {
-        if (other === this) return true
-        if (other !is MathQuestion) return false
-
-        return other.operationId == operationId
-    }
-
-    override fun hashCode() = 31 * operationId.hashCode()
-
     override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeString(operationId)
         dest.writeDouble(firstOperand)
         dest.writeDouble(secondOperand)
         dest.writeInt(operator.ordinal)
