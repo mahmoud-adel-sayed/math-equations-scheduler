@@ -53,9 +53,9 @@ public class ArithmeticWorker extends Worker {
     }
 
     @NonNull
-    static Data getWorkInputData(MathQuestion mathQuestion) {
+    static Data getWorkInputData(@NonNull String operationId, @NonNull MathQuestion mathQuestion) {
         return new Data.Builder()
-                .putString(KEY_OPERATION_ID, mathQuestion.getOperationId())
+                .putString(KEY_OPERATION_ID, operationId)
                 .putDouble(KEY_FIRST_OPERAND, mathQuestion.getFirstOperand())
                 .putDouble(KEY_SECOND_OPERAND, mathQuestion.getSecondOperand())
                 .putInt(KEY_OPERATOR_ORDINAL, mathQuestion.getOperator().ordinal())
