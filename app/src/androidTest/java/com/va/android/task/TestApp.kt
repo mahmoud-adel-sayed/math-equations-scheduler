@@ -4,7 +4,7 @@ import com.va.android.task.implementation.java.App
 import com.va.android.task.implementation.java.util.SimpleCountingIdlingResource
 
 class TestApp : App() {
-    override fun getIdlingResource(): SimpleCountingIdlingResource? = IDLING_RESOURCE
-}
+    private val idlingRes by lazy { SimpleCountingIdlingResource("APP_RESOURCE") }
 
-private val IDLING_RESOURCE = SimpleCountingIdlingResource("APP_RESOURCE")
+    override fun getIdlingResource(): SimpleCountingIdlingResource? = idlingRes
+}
