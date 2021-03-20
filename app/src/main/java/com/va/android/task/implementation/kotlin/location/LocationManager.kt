@@ -67,9 +67,11 @@ class LocationManager(
 
     @VisibleForTesting
     internal var location: Location? = null
+        private set
 
     @VisibleForTesting
     internal var requestingLocationUpdates = false
+        private set
 
     private var activity: AppCompatActivity?
 

@@ -83,7 +83,7 @@ class PendingOperationsAdapter(
                 question.firstOperand, question.operator.symbol, question.secondOperand
         )
 
-        itemViewHolder.setupTimer(operation)
+        setupTimer(itemViewHolder, operation)
     }
 
     override fun getItemCount(): Int = operations.size
@@ -108,13 +108,13 @@ class PendingOperationsAdapter(
             timer.cancel()
     }
 
-    private fun ItemViewHolder.setupTimer(operation: Operation) {
+    private fun setupTimer(holder: ItemViewHolder, operation: Operation) {
         val totalMillis = operation.endTime - System.currentTimeMillis()
         if (totalMillis <= 0) {
-            remainingTime.text = null
+            holder.remainingTime.text = null
             return
         }
-        this.timer = object : CountDownTimer(totalMillis, 1000) {
+        holder.timer = object : CountDownTimer(totalMillis, 1000) {
             override fun onTick(untilFinished: Long) {
                 var millisUntilFinished = untilFinished
 
@@ -126,16 +126,16 @@ class PendingOperationsAdapter(
 
                 val seconds = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished)
 
-                remainingTime.text = getTimeFormatted(
+                holder.remainingTime.text = getTimeFormatted(
                         hours = hours, minutes = minutes, seconds = seconds
                 )
             }
 
             override fun onFinish() {
-                remainingTime.text = null
+                holder.remainingTime.text = null
             }
         }.start()
-        timers[operation.id] = this.timer!!
+        timers[operation.id] = holder.timer!!
     }
 
     @SuppressLint("NonConstantResourceId")
