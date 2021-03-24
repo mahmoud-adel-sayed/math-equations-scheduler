@@ -87,6 +87,7 @@ class PendingOperationsAdapterTest {
         val pendingAdapter = adapter!!
 
         assertThat(pendingAdapter.itemCount, `is`(equalTo(1)))
+        Thread.sleep(200)
         pendingAdapter.clearData()
         assertThat(pendingAdapter.itemCount, `is`(equalTo(0)))
     }

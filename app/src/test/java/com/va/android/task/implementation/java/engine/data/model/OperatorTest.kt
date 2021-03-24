@@ -1,6 +1,5 @@
 package com.va.android.task.implementation.java.engine.data.model
 
-import androidx.test.filters.SmallTest
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertThat
@@ -9,7 +8,6 @@ import org.junit.Test
 /**
  * Unit tests for the operator logic.
  */
-@SmallTest
 class OperatorTest {
 
     @Test

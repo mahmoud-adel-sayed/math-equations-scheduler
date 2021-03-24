@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit
 /**
  * Tests the LocationManager.
  *
- * <p>Location Settings is not tested here, so <b>enable it on the test device or the emulator</b>
- * before running the tests.</p>
+ * <p>Location Settings is not tested here, so <b>enable it on the test device</b> before running
+ * the tests.</p>
  */
 @MediumTest
 @RunWith(AndroidJUnit4::class)
@@ -259,7 +259,7 @@ class LocationManagerTest {
     private fun optionsMock(): LocationOptions {
         val options = mock<LocationOptions>()
         `when`(options.priority).thenReturn(LocationOptions.Priority.PRIORITY_HIGH_ACCURACY)
-        `when`(options.interval).thenReturn(10000)
+        `when`(options.interval).thenReturn(10_000)
         `when`(options.fastestInterval).thenReturn(5000)
         return options
     }

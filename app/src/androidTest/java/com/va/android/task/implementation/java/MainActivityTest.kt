@@ -23,8 +23,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.*
 
-@RunWith(AndroidJUnit4::class)
 @LargeTest
+@RunWith(AndroidJUnit4::class)
 class MainActivityTest {
 
     private var idlingResource: IdlingResource? = null
