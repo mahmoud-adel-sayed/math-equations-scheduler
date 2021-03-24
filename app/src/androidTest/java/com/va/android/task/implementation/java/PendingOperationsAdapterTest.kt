@@ -88,7 +88,7 @@ class PendingOperationsAdapterTest {
 
         assertThat(pendingAdapter.itemCount, `is`(equalTo(1)))
         Thread.sleep(200)
-        pendingAdapter.clearData()
+        runOnUiThread { pendingAdapter.clearData() }
         assertThat(pendingAdapter.itemCount, `is`(equalTo(0)))
     }
 
@@ -104,7 +104,7 @@ class PendingOperationsAdapterTest {
 
         val pendingAdapter = adapter!!
         operations.add(Operation(startTime, startTime + 10_000, MATH_QUESTION))
-        pendingAdapter.replaceData(operations)
+        runOnUiThread { pendingAdapter.replaceData(operations) }
 
         assertThat(pendingAdapter.itemCount, `is`(equalTo(2)))
     }
