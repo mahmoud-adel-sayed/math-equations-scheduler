@@ -25,6 +25,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.va.android.task.implementation.java.util.TimeUtil.getTimeFormatted;
+
 public class PendingOperationsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         implements LifecycleObserver {
 
@@ -107,7 +109,9 @@ public class PendingOperationsAdapter extends RecyclerView.Adapter<RecyclerView.
 
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished);
 
-                holder.remainingTime.setText(getTimeFormatted(hours, minutes, seconds));
+                // We could also use SimpleDateFormat class to parse time here
+                String remainingTime = "Remaining Time: " + getTimeFormatted(hours, minutes, seconds);
+                holder.remainingTime.setText(remainingTime);
             }
 
             @Override
@@ -116,16 +120,6 @@ public class PendingOperationsAdapter extends RecyclerView.Adapter<RecyclerView.
             }
         }.start();
         mTimers.put(operation.getId(), holder.timer);
-    }
-
-    @NonNull
-    private static String getTimeFormatted(long hours, long minutes, long seconds) {
-        return "Remaining Time: " + getDigits(hours) + ":" + getDigits(minutes) + ":" + getDigits(seconds);
-    }
-
-    @NonNull
-    private static String getDigits(long number) {
-        return (number < 10) ? "0" + number : String.valueOf(number);
     }
 
     @SuppressLint("NonConstantResourceId")
