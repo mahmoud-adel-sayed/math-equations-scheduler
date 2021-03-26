@@ -63,6 +63,9 @@ public final class LocationManager implements LifecycleObserver {
     @VisibleForTesting
     final static String KEY_LOCATION = "KEY_LOCATION";
 
+    @VisibleForTesting
+    final static String KEY_ENABLED = "KEY_ENABLED";
+
     private AppCompatActivity mActivity;
     private final LocationOptions mOptions;
     private Listener mListener;
@@ -75,12 +78,13 @@ public final class LocationManager implements LifecycleObserver {
     private Location mLocation;
     private boolean mRequestingLocationUpdates;
 
+    @VisibleForTesting
+    boolean mEnabled;
+
     public interface Listener {
         void onProvideLocationPermissionRationale();
 
         void onLocationPermissionDenied();
-
-        boolean shouldFetchLocationInfo();
 
         default void onStartLocationListening() { }
 
@@ -111,7 +115,7 @@ public final class LocationManager implements LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     void startListening() {
-        if (mListener != null && mListener.shouldFetchLocationInfo()) startLocationUpdates();
+        if (mEnabled) startLocationUpdates();
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -143,6 +147,7 @@ public final class LocationManager implements LifecycleObserver {
      * @param savedInstanceState The savedInstanceState
      */
     public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putBoolean(KEY_ENABLED, mEnabled);
         savedInstanceState.putBoolean(KEY_REQUESTING_LOCATION_UPDATES, mRequestingLocationUpdates);
         savedInstanceState.putParcelable(KEY_LOCATION, mLocation);
     }
@@ -212,6 +217,7 @@ public final class LocationManager implements LifecycleObserver {
         } else {
             stopLocationUpdates();
             mLocation = null;
+            mEnabled = false;
         }
     }
 
@@ -288,6 +294,9 @@ public final class LocationManager implements LifecycleObserver {
         if (bundle.keySet().contains(KEY_LOCATION)) {
             mLocation = bundle.getParcelable(KEY_LOCATION);
         }
+        if (bundle.keySet().contains(KEY_ENABLED)) {
+            mEnabled = bundle.getBoolean(KEY_ENABLED);
+        }
     }
 
     // Suppressing the location permission here is safe because this method will never be called
@@ -301,6 +310,7 @@ public final class LocationManager implements LifecycleObserver {
         // Begin by checking if the device has the necessary location settings.
         mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
                 .addOnSuccessListener(mActivity, response -> {
+                    mEnabled = true;
                     mFusedLocationClient.requestLocationUpdates(
                             mLocationRequest,
                             mLocationCallback,

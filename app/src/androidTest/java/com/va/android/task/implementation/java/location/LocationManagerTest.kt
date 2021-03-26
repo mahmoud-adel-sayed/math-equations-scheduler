@@ -74,6 +74,7 @@ class LocationManagerTest {
 
         val bundle = Bundle()
         bundle.putBoolean(KEY_REQUESTING_LOCATION_UPDATES, true)
+        bundle.putBoolean(KEY_ENABLED, true)
         bundle.putParcelable(KEY_LOCATION, location)
 
         activityScenario.moveToState(State.CREATED)
@@ -81,22 +82,27 @@ class LocationManagerTest {
         runOnUiThread {
             manager = LocationManager(testActivity, bundle, optionsMock(), mock())
         }
+        val locationManager = manager!!
 
-        assertTrue(manager!!.isRequestingLocationUpdates)
-        assertEquals(location.latitude, manager?.location?.latitude)
-        assertEquals(location.longitude, manager?.location?.longitude)
+        assertTrue(locationManager.isRequestingLocationUpdates)
+        assertTrue(locationManager.mEnabled)
+        assertEquals(location.latitude, locationManager.location?.latitude)
+        assertEquals(location.longitude, locationManager.location?.longitude)
 
         bundle.remove(KEY_REQUESTING_LOCATION_UPDATES)
+        bundle.remove(KEY_ENABLED)
         bundle.remove(KEY_LOCATION)
-        manager!!.onSaveInstanceState(bundle)
+        locationManager.onSaveInstanceState(bundle)
 
         assertTrue(bundle.containsKey(KEY_REQUESTING_LOCATION_UPDATES))
         assertThat(bundle.getBoolean(KEY_REQUESTING_LOCATION_UPDATES), `is`(true))
+        assertTrue(bundle.containsKey(KEY_ENABLED))
+        assertThat(bundle.getBoolean(KEY_ENABLED), `is`(true))
 
         assertTrue(bundle.containsKey(KEY_LOCATION))
         val locationFromBundle: Location = bundle.getParcelable(KEY_LOCATION)!!
-        assertEquals(locationFromBundle.latitude, manager?.location?.latitude)
-        assertEquals(locationFromBundle.longitude, manager?.location?.longitude)
+        assertEquals(locationFromBundle.latitude, locationManager.location?.latitude)
+        assertEquals(locationFromBundle.longitude, locationManager.location?.longitude)
     }
 
     @Test
@@ -111,6 +117,7 @@ class LocationManagerTest {
 
         locationManager.onActivityResult(REQUEST_CHECK_SETTINGS, Activity.RESULT_CANCELED)
         assertFalse(locationManager.isRequestingLocationUpdates)
+        assertFalse(locationManager.mEnabled)
         verify(listener).onLocationSettingsFailure(null)
 
         locationManager.onActivityResult(REQUEST_CHECK_SETTINGS, Activity.RESULT_OK)
@@ -153,6 +160,7 @@ class LocationManagerTest {
         verify(listener).onStartLocationListening()
 
         locationManager.setEnabled(false)
+        assertFalse(locationManager.mEnabled)
         assertNull(locationManager.location)
         verifyNoMoreInteractions(listener)
         Thread.sleep(200)
@@ -173,8 +181,6 @@ class LocationManagerTest {
         var longitude: Double? = null
         val latch = CountDownLatch(1)
         val listener = object : Listener {
-            override fun shouldFetchLocationInfo(): Boolean = true
-
             override fun onProvideLocationPermissionRationale() { }
 
             override fun onLocationPermissionDenied() { }
@@ -195,6 +201,7 @@ class LocationManagerTest {
         locationManager.setEnabled(true)
 
         assertTrue(latch.await(interval + 4000, TimeUnit.MILLISECONDS))
+        assertTrue(locationManager.mEnabled)
         assertNotNull(locationManager.location)
         assertNotNull(latitude)
         assertNotNull(longitude)
@@ -205,31 +212,33 @@ class LocationManagerTest {
     @Test
     fun locationFetchingNotEnabled_onResume_shouldNotFetchLocationInfo() {
         val listener = mock<Listener>()
-        `when`(listener.shouldFetchLocationInfo()).thenReturn(false)
 
         activityScenario.moveToState(State.CREATED)
         var manager: LocationManager? = null
         runOnUiThread {
             manager = LocationManager(testActivity, null, optionsMock(), listener)
         }
+        manager!!.mEnabled = false
+
         activityScenario.moveToState(State.RESUMED)
         Thread.sleep(100)
 
         assertFalse(manager!!.isRequestingLocationUpdates)
         verify(listener, never()).onStartLocationListening()
-        verify(listener).shouldFetchLocationInfo()
+        verifyNoMoreInteractions(listener)
     }
 
     @Test
     fun locationFetchingEnabled_onResume_shouldFetchLocationInfo() {
         val listener = mock<Listener>()
-        `when`(listener.shouldFetchLocationInfo()).thenReturn(true)
 
         activityScenario.moveToState(State.CREATED)
         var manager: LocationManager? = null
         runOnUiThread {
             manager = LocationManager(testActivity, null, optionsMock(), listener)
         }
+        manager!!.mEnabled = true
+
         activityScenario.moveToState(State.RESUMED)
         Thread.sleep(100)
 
@@ -240,13 +249,14 @@ class LocationManagerTest {
     @Test
     fun locationFetchingEnabled_onResume_thenOnPause_shouldNotFetchLocationInfo() {
         val listener = mock<Listener>()
-        `when`(listener.shouldFetchLocationInfo()).thenReturn(true)
 
         activityScenario.moveToState(State.CREATED)
         var manager: LocationManager? = null
         runOnUiThread {
             manager = LocationManager(testActivity, null, optionsMock(), listener)
         }
+        manager!!.mEnabled = true
+
         activityScenario.moveToState(State.RESUMED)
         Thread.sleep(100)
         assertTrue(manager!!.isRequestingLocationUpdates)

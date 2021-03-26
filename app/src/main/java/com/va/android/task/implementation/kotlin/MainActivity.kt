@@ -282,8 +282,6 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        override fun shouldFetchLocationInfo(): Boolean = currentLocationCB.isChecked
-
         override fun onStartLocationListening() = setLocationLoading(true)
 
         override fun onLocationSettingsSuccess() {

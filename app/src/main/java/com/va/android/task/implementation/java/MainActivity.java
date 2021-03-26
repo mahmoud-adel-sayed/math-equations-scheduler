@@ -297,11 +297,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public boolean shouldFetchLocationInfo() {
-            return mCurrentLocationCB.isChecked();
-        }
-
-        @Override
         public void onStartLocationListening() {
             setLocationLoading(true);
         }

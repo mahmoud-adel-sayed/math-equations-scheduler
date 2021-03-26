@@ -42,7 +42,6 @@ class LocationManager(
         savedInstanceState: Bundle? = null,
         private val options: LocationOptions = LocationOptions.Builder().build(),
         private var listener: Listener? = null
-
 ) : LifecycleObserver {
 
     companion object {
@@ -57,6 +56,9 @@ class LocationManager(
 
         @VisibleForTesting
         internal const val KEY_LOCATION = "KEY_LOCATION"
+
+        @VisibleForTesting
+        internal const val KEY_ENABLED = "KEY_ENABLED"
     }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -73,6 +75,9 @@ class LocationManager(
     internal var requestingLocationUpdates = false
         private set
 
+    @VisibleForTesting
+    internal var isEnabled = false
+
     private var activity: AppCompatActivity?
 
     init {
@@ -85,8 +90,6 @@ class LocationManager(
         fun onProvideLocationPermissionRationale()
 
         fun onLocationPermissionDenied()
-
-        fun shouldFetchLocationInfo(): Boolean
 
         fun onStartLocationListening() { }
 
@@ -108,7 +111,7 @@ class LocationManager(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     internal fun startListening() {
-        if (listener?.shouldFetchLocationInfo() == true) startLocationUpdates()
+        if (isEnabled) startLocationUpdates()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -125,6 +128,7 @@ class LocationManager(
      * The activity must delegate the call to this method from the its similar callback.
      */
     fun onSaveInstanceState(bundle: Bundle) = with(bundle) {
+        putBoolean(KEY_ENABLED, isEnabled)
         putBoolean(KEY_REQUESTING_LOCATION_UPDATES, requestingLocationUpdates)
         putParcelable(KEY_LOCATION, location)
     }
@@ -186,6 +190,7 @@ class LocationManager(
         } else {
             stopLocationUpdates()
             location = null
+            isEnabled = false
         }
     }
 
@@ -251,6 +256,9 @@ class LocationManager(
             if (it.keySet().contains(KEY_LOCATION)) {
                 location = it.getParcelable(KEY_LOCATION)
             }
+            if (it.keySet().contains(KEY_ENABLED)) {
+                isEnabled = it.getBoolean(KEY_ENABLED)
+            }
         }
     }
 
@@ -262,6 +270,7 @@ class LocationManager(
         listener?.onStartLocationListening()
         // Begin by checking if the device has the necessary location settings.
         settingsClient.checkLocationSettings(locationSettingsRequest).addOnSuccessListener(activity!!) {
+            isEnabled = true
             fusedLocationClient.requestLocationUpdates(
                     locationRequest,
                     locationCallback,
