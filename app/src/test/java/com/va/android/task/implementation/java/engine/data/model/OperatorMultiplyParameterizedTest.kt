@@ -16,7 +16,7 @@ class OperatorMultiplyParameterizedTest(
 ) {
     companion object {
         @JvmStatic
-        @Parameters(name= "{index}: Operator.MULTIPLY.compute({0}, {1}) = {2}")
+        @Parameters(name = "{index}: Operator.MULTIPLY.compute({0}, {1}) = {2}")
         fun data(): Iterable<Array<Any>> = listOf(
                 arrayOf<Any>(0, 0, 0),
                 arrayOf<Any>(3, 3, 9),

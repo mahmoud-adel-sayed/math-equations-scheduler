@@ -15,7 +15,7 @@ class TimeUtilParameterizedTest(
 ) {
     companion object {
         @JvmStatic
-        @Parameters(name= "{index}: TimeUtil.getTimeFormatted({0}, {1}, {2}) = {3}")
+        @Parameters(name = "{index}: TimeUtil.getTimeFormatted({0}, {1}, {2}) = {3}")
         fun data(): Iterable<Array<Any>> = listOf(
                 arrayOf(0, 0, 0, "00:00:00"),
                 arrayOf(1, 0, 0, "01:00:00"),

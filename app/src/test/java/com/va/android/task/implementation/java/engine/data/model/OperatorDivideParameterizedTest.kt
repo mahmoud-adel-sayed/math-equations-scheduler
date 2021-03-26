@@ -16,7 +16,7 @@ class OperatorDivideParameterizedTest(
 ) {
     companion object {
         @JvmStatic
-        @Parameters(name= "{index}: Operator.DIVIDE.compute({0}, {1}) = {2}")
+        @Parameters(name = "{index}: Operator.DIVIDE.compute({0}, {1}) = {2}")
         fun data(): Iterable<Array<Any>> = listOf(
                 arrayOf<Any>(4, 4, 1),
                 arrayOf<Any>(-4, -4, 1),
