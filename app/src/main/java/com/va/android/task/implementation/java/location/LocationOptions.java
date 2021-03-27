@@ -42,6 +42,8 @@ public final class LocationOptions {
      * Returns the interval (in milliseconds) at which location is computed for your app.
      *
      * @return The interval (in milliseconds).
+     *
+     * @see #getFastestInterval()
      */
     public long getInterval() {
         return interval;
@@ -52,6 +54,8 @@ public final class LocationOptions {
      * other apps is delivered to your app.
      *
      * @return The fastest interval (in milliseconds).
+     *
+     * @see #getInterval()
      */
     public long getFastestInterval() {
         return fastestInterval;

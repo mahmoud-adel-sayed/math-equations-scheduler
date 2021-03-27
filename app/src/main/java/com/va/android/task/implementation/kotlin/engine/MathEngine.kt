@@ -32,13 +32,29 @@ class MathEngine(
         lifecycle.addObserver(this)
     }
 
+    /**
+     * Notifies clients about the operations.
+     */
     interface Listener {
+        /**
+         * Invoked when connected to the service and provides the [pending] operations & the [results].
+         */
         fun onConnected(pending: List<Operation>, results: List<MathAnswer>) { }
 
+        /**
+         * Invoked when the [pending] operations have changed.
+         */
         fun onPendingOperationsChanged(pending: List<Operation>) { }
 
+        /**
+         * Invoked when the operations [results] have changed.
+         */
         fun onResultsChanged(results: List<MathAnswer>) { }
 
+        /**
+         * Invoked when the user has cancelled all the pending operations by clicking on the
+         * cancelAll action button shown in the notification.
+         */
         fun onNotificationActionCancelAllClick() { }
     }
 

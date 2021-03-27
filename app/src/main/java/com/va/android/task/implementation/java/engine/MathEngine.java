@@ -33,17 +33,48 @@ public final class MathEngine implements LifecycleObserver {
     private MathEngineService mService;
     private boolean mIsBound;
 
+    /**
+     * Notifies clients about the operations.
+     */
     public interface Listener {
+        /**
+         * Invoked when connected to the service.
+         *
+         * @param pending The pending operations
+         * @param results The operations results
+         */
         default void onConnected(@NonNull List<Operation> pending,
-                                 @NonNull List<MathAnswer> results) { }
+                                 @NonNull List<MathAnswer> results) {
+        }
 
+        /**
+         * Invoked when the pending operations have changed.
+         *
+         * @param pending The pending operations
+         */
         default void onPendingOperationsChanged(@NonNull List<Operation> pending) { }
 
+        /**
+         * Invoked when the operations results have changed.
+         *
+         * @param results The operations results
+         */
         default void onResultsChanged(@NonNull List<MathAnswer> results) { }
 
+        /**
+         * Invoked when the user has cancelled all the pending operations by clicking on the
+         * cancelAll action button shown in the notification.
+         */
         default void onNotificationActionCancelAllClick() { }
     }
 
+    /**
+     * Constructor for the MathEngine component.
+     *
+     * @param context The context
+     * @param lifecycle The lifecycle
+     * @param listener The listener used to Notify clients about the operations
+     */
     public MathEngine(@NonNull Context context, @NonNull Lifecycle lifecycle,
                       @NonNull Listener listener) {
         mContext = checkNotNull(context);

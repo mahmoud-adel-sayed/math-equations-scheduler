@@ -81,20 +81,54 @@ public final class LocationManager implements LifecycleObserver {
     @VisibleForTesting
     boolean mEnabled;
 
+    /**
+     * Notifies clients about the different states of the location updates.
+     */
     public interface Listener {
+        /**
+         * Invoked to provide an additional rationale to the user.
+         */
         void onProvideLocationPermissionRationale();
 
+        /**
+         * Invoked when the user has denied the location permission.
+         */
         void onLocationPermissionDenied();
 
+        /**
+         * Invoked when starting location updates.
+         */
         default void onStartLocationListening() { }
 
+        /**
+         * Invoked when location settings has been enabled successfully.
+         */
         default void onLocationSettingsSuccess() { }
 
+        /**
+         * Invoked when location settings has been failed.
+         *
+         * @param error The error message
+         */
         default void onLocationSettingsFailure(@Nullable String error) { }
 
+        /**
+         * Invoked to provide information about the user's location.
+         *
+         * @param latitude The latitude
+         * @param longitude The longitude
+         */
         void onLocationResult(double latitude, double longitude);
     }
 
+    /**
+     * Usually called from the Activity's onCreate() method.
+     *
+     * @param activity The AppCompatActivity
+     * @param savedInstanceState The bundle obtained from the activity's onCreate() callback
+     * @param options The location options that have the Accuracy & Frequency of the location updates
+     * @param listener The listener used to notify clients about the location info
+     */
     public LocationManager(@NonNull AppCompatActivity activity, @Nullable Bundle savedInstanceState,
                            @NonNull LocationOptions options, @Nullable Listener listener) {
         mActivity = checkNotNull(activity);

@@ -4,6 +4,9 @@ import java.util.UUID;
 
 import androidx.annotation.NonNull;
 
+/**
+ * A model that represents an operation.
+ */
 public final class Operation {
     @NonNull
     private final String id;
@@ -14,6 +17,13 @@ public final class Operation {
     @NonNull
     private final MathQuestion mathQuestion;
 
+    /**
+     * Constructor for the Operation.
+     *
+     * @param startTime The operation's start time in milliseconds
+     * @param endTime The operation's end time in milliseconds
+     * @param mathQuestion The math question
+     */
     public Operation(long startTime, long endTime, @NonNull MathQuestion mathQuestion) {
         id = UUID.randomUUID().toString();
         this.startTime = startTime;
@@ -35,6 +45,8 @@ public final class Operation {
      * Returns the operation start time in milliseconds.
      *
      * @return The start time.
+     *
+     * @see #getEndTime()
      */
     @SuppressWarnings("unused")
     public long getStartTime() {
@@ -45,6 +57,8 @@ public final class Operation {
      * Returns the operation end time in milliseconds.
      *
      * @return The end time.
+     *
+     * @see #getStartTime()
      */
     public long getEndTime() {
         return endTime;

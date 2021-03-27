@@ -86,17 +86,38 @@ class LocationManager(
         appCompatActivity.lifecycle.addObserver(this)
     }
 
+    /**
+     * Notifies clients about the different states of the location updates.
+     */
     interface Listener {
+        /**
+         * Invoked to provide an additional rationale to the user.
+         */
         fun onProvideLocationPermissionRationale()
 
+        /**
+         * Invoked when the user has denied the location permission.
+         */
         fun onLocationPermissionDenied()
 
+        /**
+         * Invoked when starting location updates.
+         */
         fun onStartLocationListening() { }
 
+        /**
+         * Invoked when location settings has been enabled successfully.
+         */
         fun onLocationSettingsSuccess() { }
 
+        /**
+         * Invoked when location settings has been failed with the [error] message.
+         */
         fun onLocationSettingsFailure(error: String?) { }
 
+        /**
+         * Invoked to provide the [latitude] & [longitude] of the user's location.
+         */
         fun onLocationResult(latitude: Double, longitude: Double)
     }
 
