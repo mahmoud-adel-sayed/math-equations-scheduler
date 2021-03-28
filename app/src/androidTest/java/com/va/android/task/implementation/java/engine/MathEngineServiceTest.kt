@@ -4,8 +4,14 @@ import android.content.Intent
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ServiceTestRule
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.Until
+import com.va.android.task.R
 import com.va.android.task.answer
+import com.va.android.task.implementation.java.App
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion
 import com.va.android.task.implementation.java.engine.data.model.Operator
 import com.va.android.task.mock
@@ -75,5 +81,37 @@ class MathEngineServiceTest {
         assertThat(service.pendingOperations.size, `is`(equalTo(0)))
         assertThat(service.operationsResults.size, `is`(equalTo(1)))
         assertEquals(service.operationsResults[0].result, mathQuestion.answer())
+    }
+
+    @Test
+    fun foregroundNotification_withOnePendingAndNoResults() {
+        val context = getApplicationContext<App>()
+        val delayTime = 60L
+        val mathQuestion = MathQuestion(1.0, 1.0, Operator.ADD, delayTime)
+        serviceRule.startService(MathEngineService.createIntent(context, mathQuestion))
+
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        device.openNotification()
+
+        val content = context.getString(R.string.format_pending_finished_operations, 1, 0)
+        device.wait(Until.hasObject(By.text(content)), 5000L)
+
+        device.pressBack()
+    }
+
+    @Test
+    fun foregroundNotification_withNoPendingAndOneResult() {
+        val context = getApplicationContext<App>()
+        val delayTime = 0L
+        val mathQuestion = MathQuestion(1.0, 1.0, Operator.ADD, delayTime)
+        serviceRule.startService(MathEngineService.createIntent(context, mathQuestion))
+
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        device.openNotification()
+
+        val content = context.getString(R.string.format_pending_finished_operations, 0, 1)
+        device.wait(Until.hasObject(By.text(content)), 5000L)
+
+        device.pressBack()
     }
 }
