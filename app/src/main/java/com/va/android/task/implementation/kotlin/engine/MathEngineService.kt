@@ -38,7 +38,7 @@ class MathEngineService : Service() {
         private const val PACKAGE_NAME = BuildConfig.APPLICATION_ID
         private const val ACTION_CALCULATE = "$PACKAGE_NAME.engine.action.CALCULATE"
         private const val ACTION_RESULT = "$PACKAGE_NAME.engine.action.RESULT"
-        private const val ACTION_CANCEL_ALL = "$PACKAGE_NAME.engine.action.CANCEL_ALL"
+        @VisibleForTesting internal const val ACTION_CANCEL_ALL = "$PACKAGE_NAME.engine.action.CANCEL_ALL"
 
         private const val KEY_MATH_QUESTION = "KEY_MATH_QUESTION"
         private const val KEY_OPERATION_ID = "KEY_OPERATION_ID"

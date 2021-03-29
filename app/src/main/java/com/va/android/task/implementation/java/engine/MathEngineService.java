@@ -42,7 +42,9 @@ public class MathEngineService extends Service {
     private static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
     private static final String ACTION_CALCULATE = PACKAGE_NAME + ".engine.action.CALCULATE";
     private static final String ACTION_RESULT = PACKAGE_NAME + ".engine.action.RESULT";
-    private static final String ACTION_CANCEL_ALL = PACKAGE_NAME + ".engine.action.CANCEL_ALL";
+
+    @VisibleForTesting
+    static final String ACTION_CANCEL_ALL = PACKAGE_NAME + ".engine.action.CANCEL_ALL";
 
     private static final String KEY_MATH_QUESTION = "KEY_MATH_QUESTION";
     private static final String KEY_OPERATION_ID = "KEY_OPERATION_ID";

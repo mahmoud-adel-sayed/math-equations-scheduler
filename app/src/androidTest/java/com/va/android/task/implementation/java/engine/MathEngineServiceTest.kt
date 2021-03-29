@@ -9,14 +9,17 @@ import androidx.test.rule.ServiceTestRule
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.va.android.task.BuildConfig.APPLICATION_ID
 import com.va.android.task.R
 import com.va.android.task.answer
 import com.va.android.task.implementation.java.App
+import com.va.android.task.implementation.java.engine.MathEngineService.ACTION_CANCEL_ALL
 import com.va.android.task.implementation.java.engine.data.model.MathQuestion
 import com.va.android.task.implementation.java.engine.data.model.Operator
 import com.va.android.task.mock
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -43,6 +46,11 @@ class MathEngineServiceTest {
         service = (binder as MathEngineService.LocalBinder).service
         service.pending.clear()
         service.results.clear()
+    }
+
+    @After
+    fun tearDown() {
+        getApplicationContext<App>().sendBroadcast(Intent(ACTION_CANCEL_ALL))
     }
 
     @Test
@@ -94,7 +102,7 @@ class MathEngineServiceTest {
         device.openNotification()
 
         val content = context.getString(R.string.format_pending_finished_operations, 1, 0)
-        device.wait(Until.hasObject(By.text(content)), 5000L)
+        device.wait(Until.hasObject(By.text(content)), WAIT_TIMEOUT)
 
         device.pressBack()
     }
@@ -110,8 +118,33 @@ class MathEngineServiceTest {
         device.openNotification()
 
         val content = context.getString(R.string.format_pending_finished_operations, 0, 1)
-        device.wait(Until.hasObject(By.text(content)), 5000L)
+        device.wait(Until.hasObject(By.text(content)), WAIT_TIMEOUT)
 
         device.pressBack()
     }
+
+    @Test
+    fun foregroundNotification_clickingOnIt_opensTheApp() {
+        val context = getApplicationContext<App>()
+        val title = context.getString(R.string.label_math_engine_service)
+        val content = context.getString(R.string.format_pending_finished_operations, 0, 1)
+
+        val mathQuestion = MathQuestion(1.0, 1.0, Operator.ADD, 0L)
+        serviceRule.startService(MathEngineService.createIntent(context, mathQuestion))
+
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        device.openNotification()
+        device.wait(Until.hasObject(By.text(content)), WAIT_TIMEOUT)
+
+        val titleUiObject = device.findObject(By.text(title))
+        val contentUiObject = device.findObject(By.text(content))
+
+        assertEquals(title, titleUiObject.text)
+        assertEquals(content, contentUiObject.text)
+
+        contentUiObject.click()
+        device.wait(Until.hasObject(By.pkg(APPLICATION_ID)), WAIT_TIMEOUT)
+    }
 }
+
+private const val WAIT_TIMEOUT = 5000L
