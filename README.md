@@ -6,12 +6,13 @@ This is a sample app that communicates with a math engine service to perform som
 2. The background service relies on the **WorkManager** for scheduling tasks.
 3. Delay duration won't be exact if the device enters *Doze Mode*, WorkManager will batch jobs during maintenance windows to optimize battery usage, if we want the tasks to be executed at exact time, we can use **Alarm Manager API** and call setExactAndAllowWhileIdle() but this practice is discouraged, as it is not good for battery performance.
 4. The background service will be restarted after being destroyed by the OS or after device boot.
-5. App relies on [Fused Location Provider API][FusedLocationProvider] to get location information with **High Accuracy** and **10 seconds Frequency**, that may cause significant battery drain but we could increase the Frequency and lower the accuracy to minimize the battery usage.
-6. The project is **simply structured** but in a real project we should consider using some well known archetectures like (_MVVM_ or _MVP_).
-7. The app UI is simple and represented by single *Activity*, but could be splitted into multiple *Fragments*.
-8. Unit & Instrumentation Tests code is written in **Kotlin** and tests java implementation.
-9. LocationManagerTest does not test location settings, so currently we have to enable it on the test device before running the tests.
-10. The project is tested only on **Android Versions 7.0, 8.0, and 11.0**.
+5. The service does not handle persisting the operation results locally in a database (we could query the workManager and filter for the finished workers and get the outputData which has the results).
+6. App relies on [Fused Location Provider API][FusedLocationProvider] to get location information with **High Accuracy** and **10 seconds Frequency**, that may cause significant battery drain but we could increase the Frequency and lower the accuracy to minimize the battery usage.
+7. The project is **simply structured** but in a real project we should consider using some well known archetectures like (_MVVM_ or _MVP_).
+8. The app UI is simple and represented by single *Activity*, but could be splitted into multiple *Fragments*.
+9. Unit & Instrumentation Tests code is written in **Kotlin** and tests java implementation, we could also replicate the tests to test the kotlin implementation.
+10. LocationManagerTest does not test location settings, so currently we have to enable it on the test device before running the tests.
+11. The project is tested only on **Android Versions 7.0, 8.0, and 11.0**.
 
 ### Known Issues
 * Memory Leak caused by `MathEngineService$LocalBinder`.
