@@ -125,4 +125,6 @@ dependencies {
     androidTestImplementation "androidx.annotation:annotation:$androidXAnnotations"
     androidTestImplementation "androidx.legacy:legacy-support-v4:$androidXLegacySupport"
     androidTestImplementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'
 }

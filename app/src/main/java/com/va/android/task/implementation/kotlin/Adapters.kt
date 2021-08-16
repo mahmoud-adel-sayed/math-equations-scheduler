@@ -20,16 +20,16 @@ import java.util.concurrent.TimeUnit
 
 class OperationsResultsAdapter(
         private var mathAnswers: List<MathAnswer> = arrayListOf()
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : RecyclerView.Adapter<OperationsResultsAdapter.ItemViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.operation_result_list_item, parent, false)
         return ItemViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as ItemViewHolder).result.text = mathAnswers[position].result
+    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
+        holder.result.text = mathAnswers[position].result
     }
 
     override fun getItemCount(): Int = mathAnswers.size
@@ -39,7 +39,7 @@ class OperationsResultsAdapter(
         notifyDataSetChanged()
     }
 
-    internal class ItemViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+    class ItemViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         @SuppressLint("NonConstantResourceId")
         @BindView(R.id.result)
         lateinit var result: TextView
@@ -53,7 +53,7 @@ class OperationsResultsAdapter(
 class PendingOperationsAdapter(
         lifecycle: Lifecycle,
         private var operations: MutableList<Operation> = arrayListOf()
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), LifecycleObserver {
+) : RecyclerView.Adapter<PendingOperationsAdapter.ItemViewHolder>(), LifecycleObserver {
 
     private val timers = HashMap<String, CountDownTimer>()
 
@@ -61,35 +61,35 @@ class PendingOperationsAdapter(
         lifecycle.addObserver(this)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.pending_operation_list_item, parent, false)
         return ItemViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val itemViewHolder = holder as ItemViewHolder
+    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val operation = operations[position]
+        with(holder) {
+            if (timer != null) {
+                timer?.cancel()
+                timer = null
+                timers.remove(operation.id)
+            }
 
-        if (itemViewHolder.timer != null) {
-            itemViewHolder.timer?.cancel()
-            itemViewHolder.timer = null
-            timers.remove(operation.id)
-        }
-
-        val question = operation.mathQuestion
-        itemViewHolder.equation.text = String.format(
+            val question = operation.mathQuestion
+            equation.text = String.format(
                 Locale.US, "Equation: %.2f %s %.2f",
                 question.firstOperand, question.operator.symbol, question.secondOperand
-        )
+            )
 
-        setupTimer(itemViewHolder, operation)
+            setupTimer(this, operation)
+        }
     }
 
     override fun getItemCount(): Int = operations.size
 
     fun replaceData(operations: List<Operation>) {
-        this.operations = operations as MutableList<Operation>
+        this.operations = operations.toMutableList()
         cancelTimers()
         timers.clear()
         notifyDataSetChanged()
@@ -103,10 +103,7 @@ class PendingOperationsAdapter(
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    internal fun cancelTimers() {
-        for (timer in timers.values)
-            timer.cancel()
-    }
+    internal fun cancelTimers() = timers.values.forEach { it.cancel() }
 
     private fun setupTimer(holder: ItemViewHolder, operation: Operation) {
         val totalMillis = operation.endTime - System.currentTimeMillis()
@@ -139,7 +136,7 @@ class PendingOperationsAdapter(
     }
 
     @SuppressLint("NonConstantResourceId")
-    internal class ItemViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+    class ItemViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
         @BindView(R.id.equation)
         lateinit var equation: TextView

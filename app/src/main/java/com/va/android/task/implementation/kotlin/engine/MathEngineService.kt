@@ -148,7 +148,7 @@ class MathEngineService : Service() {
         super.onDestroy()
     }
 
-    override fun onBind(p0: Intent?): IBinder? = binder
+    override fun onBind(p0: Intent?): IBinder = binder
 
     /**
      * Class used for the client Binder. Because we know this service always

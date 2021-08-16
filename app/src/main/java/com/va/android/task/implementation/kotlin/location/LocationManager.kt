@@ -40,7 +40,7 @@ import com.google.android.gms.location.*
 class LocationManager(
         appCompatActivity: AppCompatActivity,
         savedInstanceState: Bundle? = null,
-        private val options: LocationOptions = LocationOptions.Builder().build(),
+        private val options: LocationOptions = LocationOptions(),
         private var listener: Listener? = null
 ) : LifecycleObserver {
 
