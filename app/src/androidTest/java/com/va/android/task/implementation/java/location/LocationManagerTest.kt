@@ -38,7 +38,7 @@ class LocationManagerTest {
 
     @get:Rule
     var permissionRule: GrantPermissionRule =
-            GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION)
+        GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION)
 
     private lateinit var activityScenario: ActivityScenario<TestActivity>
     private lateinit var testActivity: TestActivity
@@ -172,10 +172,10 @@ class LocationManagerTest {
         val interval = 4000L
         val fastestInterval = 2000L
         val options = LocationOptions.Builder()
-                .setPriority(LocationOptions.Priority.PRIORITY_HIGH_ACCURACY)
-                .setInterval(interval)
-                .setFastestInterval(fastestInterval)
-                .build()
+            .setPriority(LocationOptions.Priority.PRIORITY_HIGH_ACCURACY)
+            .setInterval(interval)
+            .setFastestInterval(fastestInterval)
+            .build()
 
         var latitude: Double? = null
         var longitude: Double? = null

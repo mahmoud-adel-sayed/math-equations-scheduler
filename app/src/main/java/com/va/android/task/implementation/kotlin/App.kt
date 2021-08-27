@@ -20,9 +20,9 @@ open class App : Application() {
         // Create the NotificationChannel, but only on API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                    getString(R.string.channel_engine_id),
-                    getString(R.string.channel_engine_title),
-                    NotificationManager.IMPORTANCE_LOW
+                getString(R.string.channel_engine_id),
+                getString(R.string.channel_engine_title),
+                NotificationManager.IMPORTANCE_LOW
             )
             notificationChannel.description = getString(R.string.channel_engine_desc)
             // Register the channel with the system

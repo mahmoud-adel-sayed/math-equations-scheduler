@@ -31,44 +31,6 @@ import java.util.concurrent.TimeUnit
  */
 class MathEngineService : Service() {
 
-    companion object {
-        private const val ARITHMETIC_WORK_TAG = "ARITHMETIC_WORK_TAG"
-        private const val NOTIFICATION_ID = 1
-
-        private const val PACKAGE_NAME = BuildConfig.APPLICATION_ID
-        private const val ACTION_CALCULATE = "$PACKAGE_NAME.engine.action.CALCULATE"
-        private const val ACTION_RESULT = "$PACKAGE_NAME.engine.action.RESULT"
-        @VisibleForTesting internal const val ACTION_CANCEL_ALL = "$PACKAGE_NAME.engine.action.CANCEL_ALL"
-
-        private const val KEY_MATH_QUESTION = "KEY_MATH_QUESTION"
-        private const val KEY_OPERATION_ID = "KEY_OPERATION_ID"
-        private const val KEY_RESULT = "KEY_RESULT"
-
-        @JvmStatic
-        internal fun start(c: Context) =
-                ContextCompat.startForegroundService(c, Intent(c, MathEngineService::class.java))
-
-        @JvmStatic
-        internal fun calculate(c: Context, mathQuestion: MathQuestion) =
-                ContextCompat.startForegroundService(c, createIntent(c, mathQuestion))
-
-        @VisibleForTesting
-        internal fun createIntent(c: Context, mathQuestion: MathQuestion): Intent =
-                Intent(c, MathEngineService::class.java).apply {
-                    action = ACTION_CALCULATE
-                    putExtra(KEY_MATH_QUESTION, mathQuestion)
-                }
-
-        internal fun showResult(c: Context, operationId: String, result: String) {
-            val intent = Intent(c, MathEngineService::class.java).apply {
-                action = ACTION_RESULT
-                putExtra(KEY_OPERATION_ID, operationId)
-                putExtra(KEY_RESULT, result)
-            }
-            ContextCompat.startForegroundService(c, intent)
-        }
-    }
-
     private val binder: IBinder = LocalBinder()
     private val listeners: MutableList<Listener> = ArrayList()
 
@@ -106,21 +68,21 @@ class MathEngineService : Service() {
         registerReceiver(notificationActionsReceiver, filter)
 
         val pendingIntent = PendingIntent.getActivity(
-                applicationContext,
-                System.currentTimeMillis().toInt(),
-                Intent(applicationContext, MainActivity::class.java),
-                0
+            applicationContext,
+            System.currentTimeMillis().toInt(),
+            Intent(applicationContext, MainActivity::class.java),
+            0
         )
 
         val channelId = getString(R.string.channel_engine_id)
         notificationBuilder = NotificationCompat.Builder(this, channelId)
-                .setContentTitle(getString(R.string.label_math_engine_service))
-                .setContentText(getString(R.string.engine_waiting))
-                .setContentIntent(pendingIntent)
-                .setSmallIcon(R.drawable.ic_va)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .addAction(createCancelAllAction())
+            .setContentTitle(getString(R.string.label_math_engine_service))
+            .setContentText(getString(R.string.engine_waiting))
+            .setContentIntent(pendingIntent)
+            .setSmallIcon(R.drawable.ic_va)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .addAction(createCancelAllAction())
 
         startForeground(NOTIFICATION_ID, notificationBuilder.build())
     }
@@ -177,9 +139,9 @@ class MathEngineService : Service() {
         val startTime = System.currentTimeMillis()
         val endTime = startTime + (mathQuestion.delayTime * 1000)
         val operation = Operation(
-                startTime = startTime,
-                endTime = endTime,
-                mathQuestion = mathQuestion
+            startTime = startTime,
+            endTime = endTime,
+            mathQuestion = mathQuestion
         )
 
         pending.add(operation)
@@ -191,10 +153,10 @@ class MathEngineService : Service() {
         idlingResource?.increment()
         // Enqueue work
         val workRequest = OneTimeWorkRequest.Builder(ArithmeticWorker::class.java)
-                .setInputData(operation.getWorkInputData())
-                .setInitialDelay(mathQuestion.delayTime, TimeUnit.SECONDS)
-                .addTag(ARITHMETIC_WORK_TAG)
-                .build()
+            .setInputData(operation.getWorkInputData())
+            .setInitialDelay(mathQuestion.delayTime, TimeUnit.SECONDS)
+            .addTag(ARITHMETIC_WORK_TAG)
+            .build()
         workManager.enqueue(workRequest)
     }
 
@@ -209,16 +171,16 @@ class MathEngineService : Service() {
 
     private fun updateNotificationContent() {
         val content = getString(
-                R.string.format_pending_finished_operations, pending.size, results.size
+            R.string.format_pending_finished_operations, pending.size, results.size
         )
         notificationBuilder
-                .setContentText(content)
-                .setTicker(getString(R.string.label_scheduling))
+            .setContentText(content)
+            .setTicker(getString(R.string.label_scheduling))
     }
 
     private fun createCancelAllAction(): NotificationCompat.Action {
         val pendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_ID,
-                Intent(ACTION_CANCEL_ALL), PendingIntent.FLAG_UPDATE_CURRENT)
+            Intent(ACTION_CANCEL_ALL), PendingIntent.FLAG_UPDATE_CURRENT)
 
         val actionLabel = getString(R.string.cancel_all)
         return NotificationCompat.Action.Builder(0, actionLabel, pendingIntent).build()
@@ -247,6 +209,44 @@ class MathEngineService : Service() {
                 pending.clear()
                 stopSelf()
             }
+        }
+    }
+
+    companion object {
+        private const val ARITHMETIC_WORK_TAG = "ARITHMETIC_WORK_TAG"
+        private const val NOTIFICATION_ID = 1
+
+        private const val PACKAGE_NAME = BuildConfig.APPLICATION_ID
+        private const val ACTION_CALCULATE = "$PACKAGE_NAME.engine.action.CALCULATE"
+        private const val ACTION_RESULT = "$PACKAGE_NAME.engine.action.RESULT"
+        @VisibleForTesting internal const val ACTION_CANCEL_ALL = "$PACKAGE_NAME.engine.action.CANCEL_ALL"
+
+        private const val KEY_MATH_QUESTION = "KEY_MATH_QUESTION"
+        private const val KEY_OPERATION_ID = "KEY_OPERATION_ID"
+        private const val KEY_RESULT = "KEY_RESULT"
+
+        @JvmStatic
+        internal fun start(c: Context) =
+            ContextCompat.startForegroundService(c, Intent(c, MathEngineService::class.java))
+
+        @JvmStatic
+        internal fun calculate(c: Context, mathQuestion: MathQuestion) =
+            ContextCompat.startForegroundService(c, createIntent(c, mathQuestion))
+
+        @VisibleForTesting
+        internal fun createIntent(c: Context, mathQuestion: MathQuestion): Intent =
+            Intent(c, MathEngineService::class.java).apply {
+                action = ACTION_CALCULATE
+                putExtra(KEY_MATH_QUESTION, mathQuestion)
+            }
+
+        internal fun showResult(c: Context, operationId: String, result: String) {
+            val intent = Intent(c, MathEngineService::class.java).apply {
+                action = ACTION_RESULT
+                putExtra(KEY_OPERATION_ID, operationId)
+                putExtra(KEY_RESULT, result)
+            }
+            ContextCompat.startForegroundService(c, intent)
         }
     }
 }

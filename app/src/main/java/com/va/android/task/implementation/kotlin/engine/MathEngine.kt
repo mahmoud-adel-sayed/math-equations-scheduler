@@ -20,13 +20,16 @@ import com.va.android.task.implementation.kotlin.engine.data.Operation
  */
 @Suppress("unused")
 class MathEngine(
-        private val context: Context,
-        private val lifecycle: Lifecycle,
-        private val listener: Listener
+    private val context: Context,
+    private val lifecycle: Lifecycle,
+    private val listener: Listener
 ) : LifecycleObserver {
 
     private var service: MathEngineService? = null
-    private var isBound = false
+
+    @VisibleForTesting
+    internal var isBound = false
+        private set
 
     init {
         lifecycle.addObserver(this)
@@ -77,9 +80,6 @@ class MathEngine(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     internal fun removeObserver() = lifecycle.removeObserver(this)
-
-    @VisibleForTesting
-    internal fun isBound(): Boolean = isBound
 
     /**
      * Starts the engine and wait for math questions.

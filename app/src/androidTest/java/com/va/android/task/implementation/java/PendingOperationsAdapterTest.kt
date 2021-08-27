@@ -32,7 +32,7 @@ class PendingOperationsAdapterTest {
 
     companion object {
         private val MATH_QUESTION =
-                MathQuestion(1.0, 1.0, Operator.ADD, 10)
+            MathQuestion(1.0, 1.0, Operator.ADD, 10)
     }
 
     private lateinit var activityScenario: ActivityScenario<TestActivity>
@@ -62,7 +62,7 @@ class PendingOperationsAdapterTest {
     fun timer_ticks() {
         val startTime = System.currentTimeMillis()
         val operations = listOf(
-                Operation(startTime, startTime + MATH_QUESTION.delayTime * 1000, MATH_QUESTION)
+            Operation(startTime, startTime + MATH_QUESTION.delayTime * 1000, MATH_QUESTION)
         )
         runOnUiThread {
             recyclerView.adapter = PendingOperationsAdapter(testActivity.lifecycle, operations)

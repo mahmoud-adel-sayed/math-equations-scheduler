@@ -38,28 +38,11 @@ import com.google.android.gms.location.*
  */
 @Suppress("unused")
 class LocationManager(
-        appCompatActivity: AppCompatActivity,
-        savedInstanceState: Bundle? = null,
-        private val options: LocationOptions = LocationOptions(),
-        private var listener: Listener? = null
+    appCompatActivity: AppCompatActivity,
+    savedInstanceState: Bundle? = null,
+    private val options: LocationOptions = LocationOptions(),
+    private var listener: Listener? = null
 ) : LifecycleObserver {
-
-    companion object {
-        @VisibleForTesting
-        internal const val REQUEST_LOCATION_PERMISSION = 2000
-
-        @VisibleForTesting
-        internal const val REQUEST_CHECK_SETTINGS = 2001
-
-        @VisibleForTesting
-        internal const val KEY_REQUESTING_LOCATION_UPDATES = "KEY_REQUESTING_LOCATION_UPDATES"
-
-        @VisibleForTesting
-        internal const val KEY_LOCATION = "KEY_LOCATION"
-
-        @VisibleForTesting
-        internal const val KEY_ENABLED = "KEY_ENABLED"
-    }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var settingsClient: SettingsClient
@@ -220,9 +203,9 @@ class LocationManager(
      */
     fun requestLocationPermission() {
         ActivityCompat.requestPermissions(
-                activity!!,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_LOCATION_PERMISSION
+            activity!!,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            REQUEST_LOCATION_PERMISSION
         )
     }
 
@@ -259,15 +242,15 @@ class LocationManager(
                 super.onLocationResult(locationResult)
                 location = locationResult?.lastLocation
                 listener?.onLocationResult(
-                        latitude = location?.latitude ?: 0.0,
-                        longitude = location?.longitude ?: 0.0
+                    latitude = location?.latitude ?: 0.0,
+                    longitude = location?.longitude ?: 0.0
                 )
             }
         }
     }
 
     private fun buildLocationSettingsRequest(): LocationSettingsRequest =
-            LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build()
+        LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build()
 
     private fun updateValuesFromBundle(bundle: Bundle?) {
         bundle?.let {
@@ -293,9 +276,7 @@ class LocationManager(
         settingsClient.checkLocationSettings(locationSettingsRequest).addOnSuccessListener(activity!!) {
             isEnabled = true
             fusedLocationClient.requestLocationUpdates(
-                    locationRequest,
-                    locationCallback,
-                    Looper.getMainLooper()
+                locationRequest, locationCallback, Looper.getMainLooper()
             )
             listener?.onLocationSettingsSuccess()
         }
@@ -325,5 +306,22 @@ class LocationManager(
         fusedLocationClient.removeLocationUpdates(locationCallback).addOnCompleteListener(activity!!) {
             requestingLocationUpdates = false
         }
+    }
+
+    companion object {
+        @VisibleForTesting
+        internal const val REQUEST_LOCATION_PERMISSION = 2000
+
+        @VisibleForTesting
+        internal const val REQUEST_CHECK_SETTINGS = 2001
+
+        @VisibleForTesting
+        internal const val KEY_REQUESTING_LOCATION_UPDATES = "KEY_REQUESTING_LOCATION_UPDATES"
+
+        @VisibleForTesting
+        internal const val KEY_LOCATION = "KEY_LOCATION"
+
+        @VisibleForTesting
+        internal const val KEY_ENABLED = "KEY_ENABLED"
     }
 }

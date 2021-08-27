@@ -25,10 +25,10 @@ class LocationOptionsTest {
     @Test
     fun builder_constructsObjects_correctly() {
         val options = LocationOptions.Builder()
-                .setPriority(LocationOptions.Priority.PRIORITY_LOW_POWER)
-                .setInterval(INTERVAL)
-                .setFastestInterval(FASTEST_INTERVAL)
-                .build()
+            .setPriority(LocationOptions.Priority.PRIORITY_LOW_POWER)
+            .setInterval(INTERVAL)
+            .setFastestInterval(FASTEST_INTERVAL)
+            .build()
 
         assertThat(options.priority, `is`(equalTo(LocationOptions.Priority.PRIORITY_LOW_POWER)))
         assertThat(options.interval, `is`(equalTo(INTERVAL)))
@@ -38,8 +38,8 @@ class LocationOptionsTest {
     @Test
     fun builder_settingOnlyPriority() {
         val options = LocationOptions.Builder()
-                .setPriority(LocationOptions.Priority.PRIORITY_BALANCED_POWER_ACCURACY)
-                .build()
+            .setPriority(LocationOptions.Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+            .build()
 
         assertEquals(options.priority, LocationOptions.Priority.PRIORITY_BALANCED_POWER_ACCURACY)
         assertEquals(options.interval, LocationOptions.Builder.DEFAULT_INTERVAL)
@@ -49,8 +49,8 @@ class LocationOptionsTest {
     @Test
     fun builder_settingOnlyInterval() {
         val options = LocationOptions.Builder()
-                .setInterval(INTERVAL)
-                .build()
+            .setInterval(INTERVAL)
+            .build()
 
         assertEquals(options.priority, LocationOptions.Builder.DEFAULT_PRIORITY)
         assertEquals(options.interval, INTERVAL)
@@ -60,8 +60,8 @@ class LocationOptionsTest {
     @Test
     fun builder_settingOnlyFastestInterval() {
         val options = LocationOptions.Builder()
-                .setFastestInterval(FASTEST_INTERVAL)
-                .build()
+            .setFastestInterval(FASTEST_INTERVAL)
+            .build()
 
         assertEquals(options.priority, LocationOptions.Builder.DEFAULT_PRIORITY)
         assertEquals(options.interval, LocationOptions.Builder.DEFAULT_INTERVAL)
@@ -72,9 +72,9 @@ class LocationOptionsTest {
     fun builder_withMixedValues() {
         // Setting priority & interval
         var options = LocationOptions.Builder()
-                .setPriority(LocationOptions.Priority.PRIORITY_NO_POWER)
-                .setInterval(INTERVAL)
-                .build()
+            .setPriority(LocationOptions.Priority.PRIORITY_NO_POWER)
+            .setInterval(INTERVAL)
+            .build()
 
         assertEquals(options.priority, LocationOptions.Priority.PRIORITY_NO_POWER)
         assertEquals(options.interval, INTERVAL)
@@ -82,9 +82,9 @@ class LocationOptionsTest {
 
         // Setting priority & fastestInterval
         options = LocationOptions.Builder()
-                .setPriority(LocationOptions.Priority.PRIORITY_LOW_POWER)
-                .setFastestInterval(FASTEST_INTERVAL)
-                .build()
+            .setPriority(LocationOptions.Priority.PRIORITY_LOW_POWER)
+            .setFastestInterval(FASTEST_INTERVAL)
+            .build()
 
         assertEquals(options.priority, LocationOptions.Priority.PRIORITY_LOW_POWER)
         assertEquals(options.interval, LocationOptions.Builder.DEFAULT_INTERVAL)
@@ -92,9 +92,9 @@ class LocationOptionsTest {
 
         // Setting interval & fastestInterval
         options = LocationOptions.Builder()
-                .setInterval(INTERVAL)
-                .setFastestInterval(FASTEST_INTERVAL)
-                .build()
+            .setInterval(INTERVAL)
+            .setFastestInterval(FASTEST_INTERVAL)
+            .build()
 
         assertEquals(options.priority, LocationOptions.Builder.DEFAULT_PRIORITY)
         assertEquals(options.interval, INTERVAL)

@@ -13,11 +13,11 @@ import com.va.android.task.BuildConfig
 
 @JvmOverloads
 fun showSnackBar(
-        root: View,
-        @StringRes message: Int,
-        @Duration duration: Int,
-        actionLabel: String? = null,
-        action: ((v: View) -> Unit)? = null
+    root: View,
+    @StringRes message: Int,
+    @Duration duration: Int,
+    actionLabel: String? = null,
+    action: ((v: View) -> Unit)? = null
 ) {
     val snackBar = Snackbar.make(root, message, duration)
     if (actionLabel != null && action != null) {

@@ -8,22 +8,22 @@ import com.google.android.gms.location.LocationRequest
  * This class encapsulates some properties related to the Accuracy & Frequency of the location updates.
  */
 class LocationOptions(
-        /**
-         * Returns the interval (in milliseconds) at which location is computed for your app.
-         */
-        var interval: Long = DEFAULT_INTERVAL,
+    /**
+     * Returns the interval (in milliseconds) at which location is computed for your app.
+     */
+    var interval: Long = DEFAULT_INTERVAL,
 
-        /**
-         * Returns the interval (in milliseconds) at which location computed for
-         * other apps is delivered to your app.
-         */
-        var fastestInterval: Long = DEFAULT_FASTEST_INTERVAL,
+    /**
+     * Returns the interval (in milliseconds) at which location computed for
+     * other apps is delivered to your app.
+     */
+    var fastestInterval: Long = DEFAULT_FASTEST_INTERVAL,
 
-        /**
-         * Returns the accuracy (precision of the location data).
-         */
-        @Priority
-        var priority: Int = DEFAULT_PRIORITY
+    /**
+     * Returns the accuracy (precision of the location data).
+     */
+    @Priority
+    var priority: Int = DEFAULT_PRIORITY
 )
 
 @IntDef(

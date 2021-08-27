@@ -59,8 +59,7 @@ class MainActivityTest {
         onView(withId(R.id.btn_calculate)).perform(click())
 
         // Then a snackBar message will be shown with an error (Type valid operand)
-        onView(withId(snackBarId))
-                .check(matches(withText(R.string.err_operand)))
+        onView(withId(snackBarId)).check(matches(withText(R.string.err_operand)))
     }
 
     @Test
@@ -71,8 +70,7 @@ class MainActivityTest {
         onView(withId(R.id.btn_calculate)).perform(click())
 
         // Then a snackBar message will be shown with an error (Invalid delay time)
-        onView(withId(snackBarId))
-                .check(matches(withText(R.string.err_invalid_delay_time)))
+        onView(withId(snackBarId)).check(matches(withText(R.string.err_invalid_delay_time)))
     }
 
     @Test
@@ -86,8 +84,7 @@ class MainActivityTest {
         onView(withId(R.id.btn_calculate)).perform(click())
 
         // Then a snackBar message will be shown with an error (Division by zero is undefined)
-        onView(withId(snackBarId))
-                .check(matches(withText(R.string.err_division_by_zero)))
+        onView(withId(snackBarId)).check(matches(withText(R.string.err_division_by_zero)))
     }
 
     @Test
@@ -97,7 +94,7 @@ class MainActivityTest {
         val operator = Operator.ADD
         val delayTime = 5L
         val result = String.format(Locale.US, "%.2f %s %.2f = %.2f",
-                first, operator.symbol(), second, operator.compute(first, second))
+            first, operator.symbol(), second, operator.compute(first, second))
 
         // When all inputs filled and the calculate button is clicked.
         onView(withId(R.id.et_first_operand)).perform(replaceText(first.toString()))
@@ -122,8 +119,7 @@ class MainActivityTest {
 
         // Check the correct result is displayed.
         onView(withId(R.id.rv_operations_results)).perform(nestedScrollTo())
-        onView(withId(R.id.rv_operations_results))
-                .perform(scrollToPosition<RecyclerView.ViewHolder>(0))
+        onView(withId(R.id.rv_operations_results)).perform(scrollToPosition<RecyclerView.ViewHolder>(0))
         onView(withText(result)).check(matches(isDisplayed()))
     }
 }

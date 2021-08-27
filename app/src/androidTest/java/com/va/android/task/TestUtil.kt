@@ -36,9 +36,9 @@ fun selectTabAtPosition(tabIndex: Int): ViewAction {
         override fun perform(uiController: UiController, view: View) {
             val tabLayout = view as TabLayout
             val tabAtIndex: TabLayout.Tab = tabLayout.getTabAt(tabIndex)
-                    ?: throw PerformException.Builder()
-                            .withCause(Throwable("No tab at index $tabIndex"))
-                            .build()
+                ?: throw PerformException.Builder()
+                    .withCause(Throwable("No tab at index $tabIndex"))
+                    .build()
 
             tabAtIndex.select()
         }
@@ -48,16 +48,16 @@ fun selectTabAtPosition(tabIndex: Int): ViewAction {
 fun nestedScrollTo(): ViewAction = actionWithAssertions(NestedScrollToAction())
 
 private class NestedScrollToAction(
-        private val scrollToAction: ScrollToAction = ScrollToAction()
+    private val scrollToAction: ScrollToAction = ScrollToAction()
 ) : ViewAction by scrollToAction {
 
     override fun getConstraints(): Matcher<View> = anyOf(allOf(
-            withEffectiveVisibility(Visibility.VISIBLE),
-            isDescendantOfA(anyOf(
-                    isAssignableFrom(ScrollView::class.java),
-                    isAssignableFrom(HorizontalScrollView::class.java),
-                    isAssignableFrom(NestedScrollView::class.java)
-            ))
+        withEffectiveVisibility(Visibility.VISIBLE),
+        isDescendantOfA(anyOf(
+            isAssignableFrom(ScrollView::class.java),
+            isAssignableFrom(HorizontalScrollView::class.java),
+            isAssignableFrom(NestedScrollView::class.java)
+        ))
     ))
 }
 

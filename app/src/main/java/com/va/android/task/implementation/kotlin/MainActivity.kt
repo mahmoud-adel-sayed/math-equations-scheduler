@@ -89,16 +89,12 @@ class MainActivity : AppCompatActivity() {
         setupOperationsResults()
 
         locationManager = LocationManager(
-                appCompatActivity = this,
-                savedInstanceState = savedInstanceState,
-                listener = locationListener
+            appCompatActivity = this,
+            savedInstanceState = savedInstanceState,
+            listener = locationListener
         )
 
-        mathEngine = MathEngine(
-                context = this,
-                lifecycle = lifecycle,
-                listener = mathEngineListener
-        )
+        mathEngine = MathEngine(context = this, lifecycle = lifecycle, listener = mathEngineListener)
         mathEngine.start()
     }
 
@@ -113,9 +109,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) = locationManager.onRequestPermissionsResult(requestCode, grantResults)
 
     override fun onResume() {
@@ -152,7 +148,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupOperatorsSpinner() {
         operatorsSpinner.adapter = ArrayAdapter<Operator>(
-                this, android.R.layout.simple_list_item_1, Operator.values()
+            this, android.R.layout.simple_list_item_1, Operator.values()
         )
     }
 
@@ -228,10 +224,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         val mathQuestion = MathQuestion(
-                firstOperand = firstOperand,
-                secondOperand = secondOperand,
-                operator = selectedOperator,
-                delayTime = delayTime
+            firstOperand = firstOperand,
+            secondOperand = secondOperand,
+            operator = selectedOperator,
+            delayTime = delayTime
         )
         mathEngine.calculate(mathQuestion)
 
@@ -264,21 +260,21 @@ class MainActivity : AppCompatActivity() {
     private val locationListener: LocationManager.Listener = object : LocationManager.Listener {
         override fun onProvideLocationPermissionRationale() {
             showSnackBar(
-                    root = root,
-                    message = R.string.location_permission_rationale,
-                    duration = Snackbar.LENGTH_INDEFINITE,
-                    actionLabel = getString(R.string.ok),
-                    action = { locationManager.requestLocationPermission() }
+                root = root,
+                message = R.string.location_permission_rationale,
+                duration = Snackbar.LENGTH_INDEFINITE,
+                actionLabel = getString(R.string.ok),
+                action = { locationManager.requestLocationPermission() }
             )
         }
 
         override fun onLocationPermissionDenied() {
             showSnackBar(
-                    root = root,
-                    message = R.string.permission_denied_explanation,
-                    duration = Snackbar.LENGTH_INDEFINITE,
-                    actionLabel = getString(R.string.settings),
-                    action = { startActivity(getAppSettingsIntent()) }
+                root = root,
+                message = R.string.permission_denied_explanation,
+                duration = Snackbar.LENGTH_INDEFINITE,
+                actionLabel = getString(R.string.settings),
+                action = { startActivity(getAppSettingsIntent()) }
             )
         }
 

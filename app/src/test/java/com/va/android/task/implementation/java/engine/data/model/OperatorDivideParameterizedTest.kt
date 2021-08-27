@@ -10,19 +10,19 @@ import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)
 class OperatorDivideParameterizedTest(
-        private val firstOperand: Double,
-        private val secondOperand: Double,
-        private val expectedResult: Double
+    private val firstOperand: Double,
+    private val secondOperand: Double,
+    private val expectedResult: Double
 ) {
     companion object {
         @JvmStatic
         @Parameters(name = "{index}: Operator.DIVIDE.compute({0}, {1}) = {2}")
         fun data(): Iterable<Array<Any>> = listOf(
-                arrayOf<Any>(4, 4, 1),
-                arrayOf<Any>(-4, -4, 1),
-                arrayOf<Any>(2, -2, -1),
-                arrayOf<Any>(0, 3, 0),
-                arrayOf<Any>(5.0, 2.0, 2.5)
+            arrayOf<Any>(4, 4, 1),
+            arrayOf<Any>(-4, -4, 1),
+            arrayOf<Any>(2, -2, -1),
+            arrayOf<Any>(0, 3, 0),
+            arrayOf<Any>(5.0, 2.0, 2.5)
         )
     }
 

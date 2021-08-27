@@ -19,12 +19,12 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class OperationsResultsAdapter(
-        private var mathAnswers: List<MathAnswer> = arrayListOf()
+    private var mathAnswers: List<MathAnswer> = arrayListOf()
 ) : RecyclerView.Adapter<OperationsResultsAdapter.ItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.operation_result_list_item, parent, false)
+            .inflate(R.layout.operation_result_list_item, parent, false)
         return ItemViewHolder(view)
     }
 
@@ -51,8 +51,8 @@ class OperationsResultsAdapter(
 }
 
 class PendingOperationsAdapter(
-        lifecycle: Lifecycle,
-        private var operations: MutableList<Operation> = arrayListOf()
+    lifecycle: Lifecycle,
+    private var operations: MutableList<Operation> = arrayListOf()
 ) : RecyclerView.Adapter<PendingOperationsAdapter.ItemViewHolder>(), LifecycleObserver {
 
     private val timers = HashMap<String, CountDownTimer>()
@@ -63,7 +63,7 @@ class PendingOperationsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.pending_operation_list_item, parent, false)
+            .inflate(R.layout.pending_operation_list_item, parent, false)
         return ItemViewHolder(view)
     }
 
@@ -124,7 +124,7 @@ class PendingOperationsAdapter(
                 val seconds = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished)
 
                 holder.remainingTime.text = getTimeFormatted(
-                        hours = hours, minutes = minutes, seconds = seconds
+                    hours = hours, minutes = minutes, seconds = seconds
                 )
             }
 
@@ -153,7 +153,7 @@ class PendingOperationsAdapter(
 
     companion object {
         private fun getTimeFormatted(hours: Long, minutes: Long, seconds: Long) =
-                "Remaining Time: ${hours.digits}:${minutes.digits}:${seconds.digits}"
+            "Remaining Time: ${hours.digits}:${minutes.digits}:${seconds.digits}"
 
         private val Long.digits get() = if (this < 10) "0$this" else toString()
     }

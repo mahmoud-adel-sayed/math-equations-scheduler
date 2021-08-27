@@ -5,10 +5,10 @@ import android.os.Parcelable
 import java.util.*
 
 data class Operation(
-        val id: String = UUID.randomUUID().toString(),
-        val startTime: Long,
-        val endTime: Long,
-        val mathQuestion: MathQuestion
+    val id: String = UUID.randomUUID().toString(),
+    val startTime: Long,
+    val endTime: Long,
+    val mathQuestion: MathQuestion
 ) {
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
@@ -24,17 +24,17 @@ data class Operation(
  * An Immutable model that represents a basic mathematical question.
  */
 data class MathQuestion(
-        val firstOperand: Double,
-        val secondOperand: Double,
-        val operator: Operator,
-        val delayTime: Long
+    val firstOperand: Double,
+    val secondOperand: Double,
+    val operator: Operator,
+    val delayTime: Long
 ) : Parcelable {
 
     private constructor(parcel: Parcel) : this(
-            firstOperand = parcel.readDouble(),
-            secondOperand = parcel.readDouble(),
-            operator = Operator.values()[parcel.readInt()],
-            delayTime = parcel.readLong()
+        firstOperand = parcel.readDouble(),
+        secondOperand = parcel.readDouble(),
+        operator = Operator.values()[parcel.readInt()],
+        delayTime = parcel.readLong()
     )
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
