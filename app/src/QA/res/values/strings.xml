@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">VA Task QA</string>
-    <string name="channel_engine_id" translatable="false">com.va.android.task.QA.channel.id.ENGINE</string>
+    <string name="app_name">Scheduler QA</string>
+    <string name="channel_engine_id" translatable="false">
+        com.example.android.scheduler.QA.channel.id.ENGINE
+    </string>
 </resources>

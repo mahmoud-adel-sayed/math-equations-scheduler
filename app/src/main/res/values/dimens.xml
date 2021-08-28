@@ -6,7 +6,8 @@
 
     <dimen name="section_min_height">200dp</dimen>
 
-    <dimen name="text_size_head">20sp</dimen>
-    <dimen name="text_size_subhead">16sp</dimen>
-    <dimen name="text_size_xs">10sp</dimen>
+    <!-- Typography -->
+    <dimen name="h6">20sp</dimen>
+    <dimen name="subtitle_1">16sp</dimen>
+    <dimen name="over_line">10sp</dimen>
 </resources>

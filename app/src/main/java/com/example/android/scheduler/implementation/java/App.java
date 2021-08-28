@@ -1,0 +1,50 @@
+package com.example.android.scheduler.implementation.java;
+
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
+
+import androidx.annotation.Nullable;
+
+import com.example.android.scheduler.R;
+import com.example.android.scheduler.implementation.java.util.SimpleCountingIdlingResource;
+
+public class App extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        registerChannel();
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    private void registerChannel() {
+        // Create the NotificationChannel, but only on API 26+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = new NotificationChannel(
+                    getString(R.string.channel_engine_id),
+                    getString(R.string.channel_engine_title),
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            notificationChannel.setDescription(getString(R.string.channel_engine_desc));
+            // Register the channel with the system
+            NotificationManager nm = getSystemService(NotificationManager.class);
+            if (nm != null) {
+                nm.createNotificationChannel(notificationChannel);
+            }
+        }
+    }
+
+    // The Idling Resource which will be null in production.
+    @Nullable
+    public SimpleCountingIdlingResource getIdlingResource() {
+        return null;
+    }
+
+    public Class<? extends Activity> getMainEntryPoint() {
+        return MainActivity.class;
+    }
+}

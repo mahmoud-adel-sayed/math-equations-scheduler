@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">VA Computing Task</string>
+    <string name="app_name">Scheduler</string>
 
     <!-- Math Question & Delay time -->
     <string name="mathematical_question">Mathematical Question</string>
@@ -21,7 +21,7 @@
     <string name="location_permission_rationale">Location permission is needed for this functionality.</string>
     <string name="permission_denied_explanation">Permission was denied, but is needed for this functionality.</string>
 
-    <!-- Panes -->
+    <!-- Tabs -->
     <string name="operations">Operations</string>
     <string name="pending">Pending</string>
     <string name="results">Results</string>
@@ -42,7 +42,9 @@
     <string name="a11y_location">Location Icon</string>
 
     <!-- Notification Channels -->
-    <string name="channel_engine_id" translatable="false">com.va.android.task.channel.id.ENGINE</string>
+    <string name="channel_engine_id" translatable="false">
+        com.example.android.scheduler.channel.id.ENGINE
+    </string>
     <string name="channel_engine_title" translatable="false">Math Operations</string>
     <string name="channel_engine_desc" translatable="false">
         Notifications about pending and finished math operations.

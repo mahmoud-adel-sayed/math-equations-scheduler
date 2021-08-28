@@ -1,7 +1,9 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'com.jakewharton.butterknife'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'com.jakewharton.butterknife'
+}
 
 android {
     compileSdkVersion 30
@@ -12,11 +14,11 @@ android {
     def FORMATTED_DATE = new Date().format('yyyyMMddHHmm')
 
     defaultConfig {
-        applicationId "com.va.android.task"
+        applicationId "com.example.android.scheduler"
         minSdkVersion 19
         targetSdkVersion 30
         vectorDrawables.useSupportLibrary = true
-        testInstrumentationRunner "com.va.android.task.CustomTestRunner"
+        testInstrumentationRunner "com.example.android.scheduler.CustomTestRunner"
     }
 
     buildTypes {
@@ -26,7 +28,7 @@ android {
             applicationVariants.all { variant ->
                 variant.outputs.all {
                     def flavor = variant.name
-                    outputFileName = "VA_Computing_${flavor}_${VERSION_NAME}_${FORMATTED_DATE}.apk"
+                    outputFileName = "Math_Equations_Scheduler_${flavor}_${VERSION_NAME}_${FORMATTED_DATE}.apk"
                 }
             }
         }
@@ -116,7 +118,6 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
     androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
-    // UiAutomator
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$uiAutomatorVersion"
 
     // Conflict resolution between main and test APK
@@ -126,5 +127,6 @@ dependencies {
     androidTestImplementation "androidx.legacy:legacy-support-v4:$androidXLegacySupport"
     androidTestImplementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
 
+    // Leak Canary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'
 }

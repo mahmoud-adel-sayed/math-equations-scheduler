@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name = "VA-Computing-Task"
+rootProject.name = "Math Equations Scheduler"
