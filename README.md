@@ -14,6 +14,10 @@ This is a sample app that communicates with a math engine service to perform som
 10. `LocationManagerTest` does not test *location settings*, so currently we have to enable it on the test device before running the tests.
 11. The project is tested only on **Android Versions 7.0, 8.0, and 11.0**.
 
+### Upcoming Integration
+1. Jetpack Compose Integration.
+2. Flutter Module Integration. 
+
 ### Known Issues
 * Memory Leak caused by `MathEngineService$LocalBinder`.
 
