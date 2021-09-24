@@ -4,6 +4,14 @@ import android.os.Parcel
 import android.os.Parcelable
 import java.util.*
 
+/**
+ * A model that represents an operation.
+ *
+ * @property id The ID that uniquely identifies the operation.
+ * @property startTime The operation's start time in milliseconds.
+ * @property endTime The operation's end time in milliseconds.
+ * @property mathQuestion The associated [MathQuestion].
+ */
 data class Operation(
     val id: String = UUID.randomUUID().toString(),
     val startTime: Long,
@@ -22,6 +30,11 @@ data class Operation(
 
 /**
  * An Immutable model that represents a basic mathematical question.
+ *
+ * @property firstOperand The first operand of the math equation.
+ * @property secondOperand The second operand of the math equation.
+ * @property operator The operator of the math equation.
+ * @property delayTime The delay time (in seconds) before receiving the result of the operation.
  */
 data class MathQuestion(
     val firstOperand: Double,
